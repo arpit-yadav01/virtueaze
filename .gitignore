@@ -4,11 +4,21 @@
 /node_modules
 /.pnp
 .pnp.*
+/.yarn/
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+/.pnpm-store/
+/.npm/
+/.cache/
+
+# lockfiles (optional: ignore if you do not want dependency metadata pushed)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-shrinkwrap.json
 
 # testing
 /coverage
