@@ -388,7 +388,6 @@ const projectTypes: ProjectTypeData[] = [
     { title: 'International launches', subtitle: 'Touchscreen-ready experiences for every market.', imgSrc: 'https://framerusercontent.com/images/oytc7a861tIZUl4y8BOlpxFck.png?width=1419&height=790' },
 ]
 
-const FINAL_QUOTE = 'Walk the project before the first brick is laid.'
 const INDEX_DURATION = 9.5
 const HOLD = 1.4
 const VELLUM = '#f7efdc'
@@ -398,10 +397,11 @@ const SCRUB_DURATION = 10
 const CARD_GAP = 0.03 // gap between cards, as a share of the stage height
 const IMAGE_DRIFT = 4 // how far the image lags behind its card while moving, in percent (0 at rest)
 const SIDE_DIM = 0.38 // how dark the cards above and below the active one are
-const MAX_BLUR = 18 // strongest blur on leaving text, in px
+const MAX_BLUR = 18 // strongest blur on cards and text that are leaving, in px
+const SHARP_ZONE = 0.25 // a card stays fully sharp until it is this far (a quarter of a card) from the centre
 
 const LAST = projectTypes.length - 1
-const CARD_BOX = 'left-[4vw] top-[26svh] h-[44svh] w-[92vw] md:left-[27vw] md:top-[7svh] md:h-[82svh] md:w-[68vw]'
+const CARD_BOX = 'left-[4vw] top-[31svh] h-[38svh] w-[92vw] md:left-[27vw] md:top-[7svh] md:h-[82svh] md:w-[68vw]'
 
 export default function Applications() {
     const sectionRef = useRef<HTMLElement>(null)
@@ -411,7 +411,6 @@ export default function Applications() {
     const exploreRef = useRef<HTMLButtonElement>(null)
     const marksRef = useRef<HTMLDivElement>(null)
     const overlayRef = useRef<HTMLDivElement>(null)
-    const quoteRef = useRef<HTMLDivElement>(null)
     const cursorRef = useRef<HTMLDivElement>(null)
 
     const cardRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -453,7 +452,6 @@ export default function Applications() {
         const explore = exploreRef.current
         const marks = marksRef.current
         const overlay = overlayRef.current
-        const quote = quoteRef.current
         const cursor = cursorRef.current
         const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[]
         const images = imageRefs.current.filter(Boolean) as HTMLDivElement[]
@@ -461,7 +459,7 @@ export default function Applications() {
         const detailItems = detailRefs.current.filter(Boolean) as HTMLDivElement[]
         const lastCard = cards[LAST]
 
-        if (!section || !stage || !copy || !details || !explore || !marks || !overlay || !quote || !cursor || !lastCard) return
+        if (!section || !stage || !copy || !details || !explore || !marks || !overlay || !cursor || !lastCard) return
 
         const mm = gsap.matchMedia()
 
@@ -476,14 +474,10 @@ export default function Applications() {
 
                 const rest = isDesktop
                     ? { left: '27vw', top: '7svh', width: '68vw', height: '82svh' }
-                    : { left: '4vw', top: '26svh', width: '92vw', height: '44svh' }
-
-                const words = quote.querySelectorAll<HTMLElement>('.q-word')
+                    : { left: '4vw', top: '31svh', width: '92vw', height: '38svh' }
 
                 gsap.set(cards[0], rest)
                 gsap.set(overlay, { opacity: 0 })
-                gsap.set(quote, { autoAlpha: 0 })
-                gsap.set(words, { yPercent: 115 })
 
                 // Distance from one card to the next on the strip
                 let pitch = 0
@@ -496,26 +490,28 @@ export default function Applications() {
                     cards.forEach((card, i) => {
                         const d = i - p
                         const ad = Math.abs(d)
+                        const away = Math.min(ad, 1) // 0 = active card, 1 = one full card away
                         const textAlpha = gsap.utils.clamp(0, 1, 1 - ad * 1.8)
-                        const blurAmount = reduceMotion || ad < 0.08 ? 0 : Math.min(ad * 12, MAX_BLUR)
-                        const brightness = ad < 0.08 ? 1 : 0.6 - ad * 0.18
-                        const scale = ad < 0.08 ? 1.03 : 1.08
+                        // The active card stays sharp; blur only starts once a card is clearly moving away
+                        const cardBlur = reduceMotion ? 0 : gsap.utils.clamp(0, MAX_BLUR, (ad - SHARP_ZONE) * 14)
+                        const textBlur = reduceMotion || ad < 0.02 ? 0 : Math.min(ad * 16, MAX_BLUR)
 
                         gsap.set(card, {
                             y: d * pitch,
                             autoAlpha: ad > 1.9 ? 0 : 1,
-                            filter: `blur(${blurAmount}px) brightness(${brightness}) saturate(${ad < 0.08 ? 1.15 : 0.72})`,
+                            filter: cardBlur > 0.1
+                                ? `blur(${cardBlur}px) brightness(${1 - away * 0.4}) saturate(${1.1 - away * 0.38})`
+                                : `brightness(${1 - away * 0.4}) saturate(${1.1 - away * 0.38})`,
                         })
                         gsap.set(images[i], {
                             yPercent: -d * IMAGE_DRIFT,
-                            scale,
-                            filter: `saturate(${ad < 0.08 ? 1.2 : 0.75}) contrast(${ad < 0.08 ? 1.14 : 0.9})`,
+                            scale: 1.03 + away * 0.05,
                         })
-                        gsap.set(dims[i], { opacity: Math.min(ad, 1) * SIDE_DIM })
+                        gsap.set(dims[i], { opacity: away * SIDE_DIM })
                         gsap.set(detailItems[i], {
                             opacity: textAlpha,
                             y: d * 14,
-                            filter: reduceMotion || ad < 0.08 ? 'none' : `blur(${blurAmount}px)`,
+                            filter: textBlur ? `blur(${textBlur}px)` : 'none',
                         })
                     })
 
@@ -565,8 +561,6 @@ export default function Applications() {
                     0
                 )
 
-                tl.to({}, { duration: HOLD }, 0)
-
                 const expand = gsap.timeline()
 
                 expand.to(
@@ -584,14 +578,9 @@ export default function Applications() {
                 expand.to([marks, explore], { autoAlpha: 0, duration: 0.5, ease: 'power1.out' }, 0)
                 expand.to([copy, details], { opacity: 0, y: -30, duration: 0.8, ease: 'power2.out' }, 0)
                 expand.to(overlay, { opacity: 0.78, duration: 2, ease: 'power1.inOut' }, 0)
-                expand.to(quote, { autoAlpha: 1, duration: 0.3 }, 1)
-                expand.to(
-                    words,
-                    { yPercent: 0, duration: 0.9, ease: 'power3.out', stagger: 0.06 },
-                    1.05
-                )
 
-                tl.add(expand, `>+=${HOLD}`)
+                // Starts only after the last card has settled and been held for a moment
+                tl.add(expand, INDEX_DURATION + HOLD)
 
                 const total = tl.totalDuration()
                 snapPoints = [...projectTypes.map((_, i) => ((i / LAST) * INDEX_DURATION) / total), 1]
@@ -686,7 +675,7 @@ export default function Applications() {
 
                 <div
                     ref={copyRef}
-                    className="pointer-events-none absolute left-[5vw] right-[5vw] top-[6svh] z-20 text-left text-[#f7efdc] md:left-[5vw] md:right-auto md:top-[17svh] md:w-[22vw]"
+                    className="pointer-events-none absolute left-[5vw] right-[5vw] top-[5svh] z-20 text-left text-[#f7efdc] md:left-[4vw] md:right-auto md:top-[14svh] md:w-[21vw]"
                 >
                     <div className="inline-block rounded-full border border-[#d5bd87]/25 bg-[#0b0d0a]/40 px-2.5 py-1.5 backdrop-blur-sm">
                         <span className="text-[9px] uppercase tracking-[0.18em] text-[#d5bd87] sm:text-xs">
@@ -694,7 +683,7 @@ export default function Applications() {
                         </span>
                     </div>
                     <h2
-                        className="mt-3 max-w-[680px] text-[clamp(2.5rem,9vw,4.2rem)] font-medium uppercase leading-[0.9] tracking-[-0.05em] text-[#f7efdc] md:text-[clamp(3.2rem,3vw,5rem)]"
+                        className="mt-3 max-w-[680px] text-[clamp(1.9rem,8vw,3rem)] font-medium uppercase leading-[0.92] tracking-[-0.05em] text-[#f7efdc] [overflow-wrap:anywhere] md:text-[clamp(2rem,3.3vw,4.4rem)]"
                         style={{ fontFamily: 'var(--font-decart)' }}
                     >
                         One digital twin for every kind of project.
@@ -719,7 +708,7 @@ export default function Applications() {
                                     loading={idx < 2 ? 'eager' : 'lazy'}
                                     decoding="async"
                                     draggable={false}
-                                    className="h-full w-full select-none object-cover object-center transition-[filter,transform] duration-500"
+                                    className="h-full w-full select-none object-cover object-center"
                                 />
                             </div>
                             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#070907]/65 via-[#070907]/20 to-transparent" />
@@ -731,7 +720,7 @@ export default function Applications() {
 
                 <div
                     ref={detailsRef}
-                    className="pointer-events-none absolute bottom-[11svh] left-[5vw] z-20 w-[90vw] text-[#f7efdc] md:bottom-[13svh] md:left-[5vw] md:w-[22vw]"
+                    className="pointer-events-none absolute bottom-[10svh] left-[5vw] z-20 w-[90vw] text-[#f7efdc] md:bottom-[11svh] md:left-[4vw] md:w-[21vw]"
                 >
                     {projectTypes.map((project, idx) => (
                         <div
@@ -745,7 +734,7 @@ export default function Applications() {
                                 <span>Project type</span>
                                 <span className="text-white/55">{String(idx + 1).padStart(2, '0')} / {String(projectTypes.length).padStart(2, '0')}</span>
                             </div>
-                            <h3 className="text-[clamp(2rem,7vw,3rem)] uppercase leading-[0.95] tracking-[-0.05em] text-[#f5efe5] md:text-[clamp(2rem,3vw,3rem)]" style={{ fontFamily: 'var(--font-decart)' }}>
+                            <h3 className="text-[clamp(1.5rem,6.5vw,2.4rem)] uppercase leading-[0.95] tracking-[-0.05em] text-[#f5efe5] [overflow-wrap:anywhere] md:text-[clamp(1.4rem,2.3vw,2.6rem)]" style={{ fontFamily: 'var(--font-decart)' }}>
                                 {project.title}
                             </h3>
                             <p className="mt-2 max-w-[42ch] text-[0.78rem] leading-relaxed text-white/80 sm:text-sm md:mt-3 md:text-sm">
@@ -759,7 +748,7 @@ export default function Applications() {
                     ref={exploreRef}
                     type="button"
                     onClick={() => selectProject((activeIndex + 1) % projectTypes.length)}
-                    className="group absolute bottom-[10svh] right-[6vw] z-30 inline-flex min-h-11 items-center gap-2 rounded-full border border-white/35 bg-black/30 px-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:border-[#d5bd87] hover:text-[#f5dfad] md:bottom-[13svh] md:right-[5vw] md:min-h-12 md:px-6 md:text-xs"
+                    className="group absolute bottom-[10svh] right-[6vw] z-30 hidden min-h-11 items-center gap-2 rounded-full border border-white/35 bg-black/30 px-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:border-[#d5bd87] hover:text-[#f5dfad] md:bottom-[11svh] md:right-[5vw] md:inline-flex md:min-h-12 md:px-6 md:text-xs"
                     aria-label="Explore the next project type"
                 >
                     Explore
@@ -811,24 +800,6 @@ export default function Applications() {
                     </div>
                 </div>
 
-                {/* Final full-screen quote */}
-                <div
-                    ref={quoteRef}
-                    className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center px-6 text-center"
-                    style={{ color: VELLUM }}
-                >
-                    <p
-                        aria-label={FINAL_QUOTE}
-                        className="max-w-[800px] text-5xl md:text-6xl lg:text-7xl font-medium uppercase tracking-[-0.04em] leading-[1.1]"
-                        style={{ fontFamily: 'var(--font-gilroy)' }}
-                    >
-                        {FINAL_QUOTE.split(' ').map((word, i) => (
-                            <span key={i} aria-hidden className="mr-[0.22em] inline-block overflow-hidden pb-[0.08em] align-bottom">
-                                <span className="q-word inline-block">{word}</span>
-                            </span>
-                        ))}
-                    </p>
-                </div>
             </div>
         </section>
     )
