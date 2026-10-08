@@ -389,16 +389,16 @@ const projectTypes: ProjectTypeData[] = [
 ]
 
 const FINAL_QUOTE = 'Walk the project before the first brick is laid.'
-const INDEX_DURATION = 4.5
-const HOLD = 0.4
+const INDEX_DURATION = 9.5
+const HOLD = 1.4
 const VELLUM = '#f7efdc'
-const SCRUB_DURATION = 6
+const SCRUB_DURATION = 10
 
 // Reel tuning
 const CARD_GAP = 0.03 // gap between cards, as a share of the stage height
-const IMAGE_DRIFT = 6 // how far the image lags behind its card while moving, in percent (0 at rest)
-const SIDE_DIM = 0.5 // how dark the cards above and below the active one are
-const MAX_BLUR = 14 // strongest blur on leaving text, in px
+const IMAGE_DRIFT = 4 // how far the image lags behind its card while moving, in percent (0 at rest)
+const SIDE_DIM = 0.38 // how dark the cards above and below the active one are
+const MAX_BLUR = 18 // strongest blur on leaving text, in px
 
 const LAST = projectTypes.length - 1
 const CARD_BOX = 'left-[4vw] top-[26svh] h-[44svh] w-[92vw] md:left-[27vw] md:top-[7svh] md:h-[82svh] md:w-[68vw]'
@@ -496,15 +496,26 @@ export default function Applications() {
                     cards.forEach((card, i) => {
                         const d = i - p
                         const ad = Math.abs(d)
-                        const textAlpha = gsap.utils.clamp(0, 1, 1 - ad * 2.4)
+                        const textAlpha = gsap.utils.clamp(0, 1, 1 - ad * 1.8)
+                        const blurAmount = reduceMotion || ad < 0.08 ? 0 : Math.min(ad * 12, MAX_BLUR)
+                        const brightness = ad < 0.08 ? 1 : 0.6 - ad * 0.18
+                        const scale = ad < 0.08 ? 1.03 : 1.08
 
-                        gsap.set(card, { y: d * pitch, autoAlpha: ad > 1.7 ? 0 : 1 })
-                        gsap.set(images[i], { yPercent: -d * IMAGE_DRIFT })
+                        gsap.set(card, {
+                            y: d * pitch,
+                            autoAlpha: ad > 1.9 ? 0 : 1,
+                            filter: `blur(${blurAmount}px) brightness(${brightness}) saturate(${ad < 0.08 ? 1.15 : 0.72})`,
+                        })
+                        gsap.set(images[i], {
+                            yPercent: -d * IMAGE_DRIFT,
+                            scale,
+                            filter: `saturate(${ad < 0.08 ? 1.2 : 0.75}) contrast(${ad < 0.08 ? 1.14 : 0.9})`,
+                        })
                         gsap.set(dims[i], { opacity: Math.min(ad, 1) * SIDE_DIM })
                         gsap.set(detailItems[i], {
                             opacity: textAlpha,
-                            y: d * 22,
-                            filter: reduceMotion || ad < 0.01 ? 'none' : `blur(${Math.min(ad * 16, MAX_BLUR)}px)`,
+                            y: d * 14,
+                            filter: reduceMotion || ad < 0.08 ? 'none' : `blur(${blurAmount}px)`,
                         })
                     })
 
@@ -553,6 +564,8 @@ export default function Applications() {
                     },
                     0
                 )
+
+                tl.to({}, { duration: HOLD }, 0)
 
                 const expand = gsap.timeline()
 
@@ -673,13 +686,15 @@ export default function Applications() {
 
                 <div
                     ref={copyRef}
-                    className="pointer-events-none absolute left-[6vw] right-[6vw] top-[8svh] z-20 text-left text-[#f7efdc] md:left-[5vw] md:right-auto md:top-[17svh] md:w-[20vw]"
+                    className="pointer-events-none absolute left-[5vw] right-[5vw] top-[6svh] z-20 text-left text-[#f7efdc] md:left-[5vw] md:right-auto md:top-[17svh] md:w-[22vw]"
                 >
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-[#d5bd87] sm:text-xs">
-                        Virtuaze / Project applications
-                    </span>
+                    <div className="inline-block rounded-full border border-[#d5bd87]/25 bg-[#0b0d0a]/40 px-2.5 py-1.5 backdrop-blur-sm">
+                        <span className="text-[9px] uppercase tracking-[0.18em] text-[#d5bd87] sm:text-xs">
+                            Virtuaze / Project applications
+                        </span>
+                    </div>
                     <h2
-                        className="mt-2 max-w-[700px] text-3xl font-medium uppercase leading-[1.04] sm:text-4xl md:text-5xl"
+                        className="mt-3 max-w-[680px] text-[clamp(2.5rem,9vw,4.2rem)] font-medium uppercase leading-[0.9] tracking-[-0.05em] text-[#f7efdc] md:text-[clamp(3.2rem,3vw,5rem)]"
                         style={{ fontFamily: 'var(--font-decart)' }}
                     >
                         One digital twin for every kind of project.
@@ -704,10 +719,10 @@ export default function Applications() {
                                     loading={idx < 2 ? 'eager' : 'lazy'}
                                     decoding="async"
                                     draggable={false}
-                                    className="h-full w-full select-none object-contain object-center"
+                                    className="h-full w-full select-none object-cover object-center transition-[filter,transform] duration-500"
                                 />
                             </div>
-                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#080a08]/45 via-transparent to-transparent" />
+                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#070907]/65 via-[#070907]/20 to-transparent" />
                             {isLast && <div ref={overlayRef} className="absolute inset-0 bg-[#080a08] opacity-0" />}
                             <div ref={(el) => { dimRefs.current[idx] = el }} className="pointer-events-none absolute inset-0 bg-[#080a08] opacity-0" />
                         </div>
@@ -716,24 +731,24 @@ export default function Applications() {
 
                 <div
                     ref={detailsRef}
-                    className="pointer-events-none absolute bottom-[17svh] left-[6vw] z-20 w-[88vw] text-[#f7efdc] md:bottom-[13svh] md:left-[5vw] md:w-[20vw]"
+                    className="pointer-events-none absolute bottom-[11svh] left-[5vw] z-20 w-[90vw] text-[#f7efdc] md:bottom-[13svh] md:left-[5vw] md:w-[22vw]"
                 >
                     {projectTypes.map((project, idx) => (
                         <div
                             key={project.title}
                             ref={(el) => { detailRefs.current[idx] = el }}
                             aria-hidden={idx !== activeIndex}
-                            className={`absolute bottom-0 left-0 right-0 will-change-[transform,opacity,filter] ${idx === 0 ? 'opacity-100' : 'opacity-0'}`}
+                            className={`absolute bottom-0 left-0 right-0 rounded-2xl border border-white/10 bg-[#0b0d0a]/50 px-3.5 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.24)] backdrop-blur-[2px] will-change-[transform,opacity,filter] ${idx === 0 ? 'opacity-100' : 'opacity-0'}`}
                         >
-                            <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-[#d5bd87] sm:text-xs md:mb-2 md:gap-3">
-                                <span className="h-px w-7 bg-[#d5bd87]" />
+                            <div className="mb-2 flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-[#d5bd87] sm:text-xs md:mb-2 md:gap-3">
+                                <span className="h-px w-5 bg-[#d5bd87] md:w-7" />
                                 <span>Project type</span>
                                 <span className="text-white/55">{String(idx + 1).padStart(2, '0')} / {String(projectTypes.length).padStart(2, '0')}</span>
                             </div>
-                            <h3 className="text-2xl uppercase leading-tight sm:text-3xl md:text-4xl" style={{ fontFamily: 'var(--font-decart)' }}>
+                            <h3 className="text-[clamp(2rem,7vw,3rem)] uppercase leading-[0.95] tracking-[-0.05em] text-[#f5efe5] md:text-[clamp(2rem,3vw,3rem)]" style={{ fontFamily: 'var(--font-decart)' }}>
                                 {project.title}
                             </h3>
-                            <p className="mt-2 max-w-[42ch] text-sm leading-relaxed text-white/75 sm:text-base md:mt-3 md:text-sm">
+                            <p className="mt-2 max-w-[42ch] text-[0.78rem] leading-relaxed text-white/80 sm:text-sm md:mt-3 md:text-sm">
                                 {project.subtitle}
                             </p>
                         </div>
