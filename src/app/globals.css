@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-gilroy), Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-geist-mono, monospace);
+}
+
+body {
+   background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Premium Animations */
+.roll-button {
+  position: relative;
+  overflow: hidden;
+}
+.roll-button .roll-text {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-block;
+}
+.roll-button:hover .roll-text {
+  transform: translateY(-120%);
+}
+.roll-button::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 120%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.roll-button:hover::after {
+  transform: translateY(-120%);
+}
+
+/* Image masking */
+.mask-image-gradient {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 30%);
+  mask-image: linear-gradient(to right, transparent, black 30%);
+}
