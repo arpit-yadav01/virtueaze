@@ -431,7 +431,7 @@ export default function Spotlight({ backgroundImages = ["https://images.unsplash
             so the 3D laptop is framed the same way and is never squashed or cropped. */}
         <div
           ref={stageRef}
-          className="relative z-10 mt-6 h-[42vh] min-h-[320px] w-full flex-none sm:mt-10 sm:h-[85vh] sm:w-[min(82vw,calc(85vh*1.25))]"
+          className="relative z-10 mt-6 h-[42vh] min-h-[320px] w-full flex-none sm:mt-10 sm:h-[68vh] sm:w-[min(70vw,calc(68vh*1.25))]"
         >
           <div
             ref={bgRef}

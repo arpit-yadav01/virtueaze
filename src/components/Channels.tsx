@@ -900,7 +900,6 @@ const projectTypes: ProjectTypeData[] = [
     { title: 'International launches', subtitle: 'Touchscreen-ready experiences for every market.', imgSrc: 'https://framerusercontent.com/images/oytc7a861tIZUl4y8BOlpxFck.png?width=1419&height=790' },
 ]
 
-const FINAL_QUOTE = 'Walk the project before the first brick is laid.'
 const INDEX_DURATION = 4.5
 const HOLD = 0.4
 const VELLUM = '#f7efdc'
@@ -1312,24 +1311,6 @@ export default function Applications() {
                     </div>
                 </div>
 
-                {/* Final full-screen quote */}
-                <div
-                    ref={quoteRef}
-                    className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center px-6 text-center"
-                    style={{ color: VELLUM }}
-                >
-                    <p
-                        aria-label={FINAL_QUOTE}
-                        className="max-w-[800px] text-5xl md:text-6xl lg:text-7xl font-medium uppercase tracking-[-0.04em] leading-[1.1]"
-                        style={{ fontFamily: 'var(--font-gilroy)' }}
-                    >
-                        {FINAL_QUOTE.split(' ').map((word, i) => (
-                            <span key={i} aria-hidden className="mr-[0.22em] inline-block overflow-hidden pb-[0.08em] align-bottom">
-                                <span className="q-word inline-block">{word}</span>
-                            </span>
-                        ))}
-                    </p>
-                </div>
             </div>
         </section>
     )
