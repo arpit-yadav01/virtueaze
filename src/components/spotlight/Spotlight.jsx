@@ -485,4 +485,4 @@ export default function Spotlight({ backgroundImages = ["https://images.unsplash
       </div>
     </section>
   )
-}
+} 
