@@ -874,6 +874,7 @@
 
 
 
+
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
@@ -888,22 +889,21 @@ if (typeof window !== 'undefined') {
 interface ProjectTypeData {
     title: string
     subtitle: string
-    imgSrc: string
+    videoSrc: string
 }
 
 const projectTypes: ProjectTypeData[] = [
-    { title: 'Residential towers', subtitle: 'Full elevation and floor control.', imgSrc: 'https://framerusercontent.com/images/PIckQ7vs3QZXJ2eLyq91rmt3hLk.png?width=1399&height=670' },
-    { title: 'Luxury residences', subtitle: 'Material, detail and atmosphere in every room.', imgSrc: 'https://framerusercontent.com/images/qWNssr2VW9pk5zkdisoIYcc0Uo.png?width=1367&height=790' },
-    { title: 'Masterplans', subtitle: 'Navigate phases, amenities and the bigger picture.', imgSrc: 'https://framerusercontent.com/images/QSUDPXU7sOqM557B2LAeaCrKIhc.png?width=1316&height=791' },
-    { title: 'Villas & plots', subtitle: 'Plots, boundaries and custom villa walkthroughs.', imgSrc: 'https://framerusercontent.com/images/eKrcvOMsf6CXnBH0uTpWJli2vY.png?scale-down-to=1024&width=1180&height=900' },
-    { title: 'Commercial & retail', subtitle: 'Footfall, leasing layouts and retail possibilities.', imgSrc: 'https://framerusercontent.com/images/venMvyC03Nyji0T9rBpLlWjBjxo.png?width=1367&height=790' },
-    { title: 'International launches', subtitle: 'Touchscreen-ready experiences for every market.', imgSrc: 'https://framerusercontent.com/images/oytc7a861tIZUl4y8BOlpxFck.png?width=1419&height=790' },
+    { title: 'Shareable web link', subtitle: 'Buyers explore the neighbourhood from any browser, no app download.', videoSrc: '/models/video/066VR8SS0O6pJhlXnKV1yR5vuws.mp4' },
+    { title: 'Client meetings', subtitle: 'Walk buyers through the project on a laptop, right at the table.', videoSrc: '/models/video/CYjxlhP8w2vuDGr8Nnwq4IggYjA.mp4' },
+    { title: 'Sales gallery', subtitle: 'Touchscreen walkthroughs that let buyers navigate the towers themselves.', videoSrc: '/models/video/hnJ4SM3PJMiiZKz0ZTzGhv6jzM.mp4' },
+    { title: 'Unit selection', subtitle: 'Open any floor and pick the exact unit, with live availability.', videoSrc: '/models/video/iERQpQTjyC530ipfTVrYwPCkhg.mp4' },
 ]
 
-const INDEX_DURATION = 4.5
-const HOLD = 0.4
 const VELLUM = '#f7efdc'
-const SCRUB_DURATION = 6
+const SCRUB_DURATION = 6 // how many screen-heights of scrolling the whole section takes
+const STEP_MOVE = 1 // scroll share for moving from one card to the next
+const STEP_HOLD = 0.8 // scroll share where the gallery rests on each card so its text can be read
+const HOLD = 0.4 // pause on the last card before the ending
 
 // Gallery tuning
 const CARD_RATIO = 1.7 // card width divided by height
@@ -911,19 +911,22 @@ const SIDE_SCALE = 0.55 // size of the cards before and after the active one
 const TILT = 10 // lean of the side cards, in degrees
 const SIDE_DIM = 0.35 // how dark the side cards are
 const LEAN = 5 // how much cards skew while moving, in degrees (0 turns it off)
-const MAX_BLUR = 14 // strongest blur on leaving text, in px
 const RADIUS = 22 // card corner radius, in px
+const TEXT_CLEAR_ZONE = 0.35 // project text stays fully sharp until its card is this far from the centre
+const TEXT_FADE = 0.2 // then it fades and blurs out over this much further movement
 
 const LAST = projectTypes.length - 1
+// Timeline position of the middle of card i's rest
+const restTime = (i: number) => i * (STEP_MOVE + STEP_HOLD) + STEP_HOLD / 2
+const STRIP_DURATION = LAST * STEP_MOVE + (LAST + 1) * STEP_HOLD
 
-export default function Applications() {
+export default function Channels() {
     const sectionRef = useRef<HTMLElement>(null)
     const stageRef = useRef<HTMLDivElement>(null)
     const copyRef = useRef<HTMLDivElement>(null)
     const detailsRef = useRef<HTMLDivElement>(null)
     const exploreRef = useRef<HTMLButtonElement>(null)
     const marksRef = useRef<HTMLDivElement>(null)
-    const quoteRef = useRef<HTMLDivElement>(null)
 
     const cardRefs = useRef<(HTMLDivElement | null)[]>([])
     const dimRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -936,18 +939,42 @@ export default function Applications() {
     const stRef = useRef<ScrollTrigger | null>(null)
     const tlRef = useRef<gsap.core.Timeline | null>(null)
 
+    const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
+    const [inView, setInView] = useState(false)
+
+    // Videos that could not be loaded; those cards show a plain panel instead
+    const [failedVideos, setFailedVideos] = useState<Record<number, boolean>>({})
+    const markFailed = (idx: number, src: string) => {
+        console.warn('[Channels] video failed to load:', src)
+        setFailedVideos((prev) => (prev[idx] ? prev : { ...prev, [idx]: true }))
+    }
+
+    // Only the active card's video plays, and only while the section is on screen
+    useEffect(() => {
+        const section = sectionRef.current
+        if (!section) return
+        const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting))
+        observer.observe(section)
+        return () => observer.disconnect()
+    }, [])
+
+    useEffect(() => {
+        videoRefs.current.forEach((video, idx) => {
+            if (!video) return
+            if (inView && idx === activeIndex) video.play().catch(() => {})
+            else video.pause()
+        })
+    }, [activeIndex, inView, failedVideos])
+
     const selectProject = (requestedIndex: number) => {
         const nextIndex = Math.max(0, Math.min(LAST, requestedIndex))
         const trigger = stRef.current
         const timeline = tlRef.current
-
         if (!trigger || !timeline) return
 
-        const indexTime = (nextIndex / LAST) * INDEX_DURATION
-        const timelineProgress = indexTime / timeline.totalDuration()
+        const timelineProgress = restTime(nextIndex) / timeline.totalDuration()
         const scrollTop = trigger.start + (trigger.end - trigger.start) * timelineProgress
         const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
-
         window.scrollTo({ top: scrollTop, behavior })
     }
 
@@ -958,12 +985,11 @@ export default function Applications() {
         const details = detailsRef.current
         const explore = exploreRef.current
         const marks = marksRef.current
-        const quote = quoteRef.current
         const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[]
         const dims = dimRefs.current.filter(Boolean) as HTMLDivElement[]
         const detailItems = detailRefs.current.filter(Boolean) as HTMLDivElement[]
 
-        if (!section || !stage || !copy || !details || !explore || !marks || !quote || cards.length !== projectTypes.length) return
+        if (!section || !stage || !copy || !details || !explore || !marks || cards.length !== projectTypes.length) return
 
         const mm = gsap.matchMedia()
 
@@ -976,13 +1002,9 @@ export default function Applications() {
             (ctx) => {
                 const { isDesktop, reduceMotion } = ctx.conditions as { isDesktop: boolean; reduceMotion: boolean }
                 const clamp = gsap.utils.clamp
-                const words = quote.querySelectorAll<HTMLElement>('.q-word')
                 const state = proxy.current
 
-                gsap.set(quote, { autoAlpha: 0 })
-                gsap.set(words, { yPercent: 115 })
-
-                // Card size, the active card's centre, and the step from one card to the next
+                // Card size, the active card's centre, and the step from one card to the next along the diagonal
                 let sw = 0, sh = 0, W = 0, H = 0, CX = 0, CY = 0, DX = 0, DY = 0
                 const measure = () => {
                     sw = stage.offsetWidth
@@ -991,15 +1013,15 @@ export default function Applications() {
                         W = Math.min(sw * 0.44, sh * 0.6 * CARD_RATIO)
                         CX = sw * 0.6; CY = sh * 0.5; DX = sw * 0.17; DY = sh * 0.42
                     } else {
-                        W = sw * 0.8
-                        CX = sw * 0.5; CY = sh * 0.46; DX = sw * 0.3; DY = sh * 0.21
+                        W = sw * 0.86
+                        CX = sw * 0.5; CY = sh * 0.45; DX = sw * 0.42; DY = sh * 0.26
                     }
                     H = W / CARD_RATIO
                 }
 
                 let lean = 0
 
-                // Places every card and text block for the current index (0 to 5) and expand amount (0 to 1)
+                // Places every card and text block for the current index (0 to 5) and ending amount (0 to 1)
                 const render = () => {
                     const p = state.value
                     const e = state.expand
@@ -1009,10 +1031,12 @@ export default function Applications() {
                         const ad = Math.abs(d)
                         const isLast = i === LAST
 
+                        const textAlpha = clamp(0, 1, 1 - (ad - TEXT_CLEAR_ZONE) / TEXT_FADE)
+                        const textBlur = reduceMotion || ad <= TEXT_CLEAR_ZONE ? 0 : Math.min((ad - TEXT_CLEAR_ZONE) * 40, 10)
                         gsap.set(detailItems[i], {
-                            opacity: clamp(0, 1, 1 - ad * 2.4),
-                            y: d * 22,
-                            filter: reduceMotion || ad < 0.01 ? 'none' : `blur(${Math.min(ad * 16, MAX_BLUR)}px)`,
+                            opacity: textAlpha,
+                            y: ad <= TEXT_CLEAR_ZONE ? 0 : Math.sign(d) * (ad - TEXT_CLEAR_ZONE) * 40,
+                            filter: textBlur ? `blur(${textBlur}px)` : 'none',
                         })
 
                         if (ad > 2.5) {
@@ -1022,7 +1046,9 @@ export default function Applications() {
 
                         let w = W, h = H
                         let cx = CX + d * DX, cy = CY + d * DY
-                        let alpha = ad <= 1 ? 1 : clamp(0, 1, 1 - (ad - 1) * 0.8)
+                        let alpha = isDesktop
+                            ? (ad <= 1 ? 1 : clamp(0, 1, 1 - (ad - 1) * 0.8))
+                            : clamp(0, 1, 1 - ad * 1.6) // phones: no room beside the text, so side cards fade out
                         const scale = ad <= 1 ? 1 - (1 - SIDE_SCALE) * ad : Math.max(0.4, SIDE_SCALE - 0.12 * (ad - 1))
 
                         if (isLast) {
@@ -1043,11 +1069,14 @@ export default function Applications() {
                             rotation: clamp(-1.5, 1.5, d) * TILT,
                             skewY: lean * LEAN * (1 - e),
                             autoAlpha: alpha,
+                            visibility: alpha > 0 ? 'visible' : 'hidden',
                             zIndex: 20 - Math.round(ad * 4) + (isLast && e > 0 ? 10 : 0),
                             borderRadius: isLast ? RADIUS * (1 - e) : RADIUS,
                             filter: ad > 1 && !reduceMotion ? `blur(${(ad - 1) * 6}px)` : 'none',
                         })
-                        gsap.set(dims[i], { opacity: isLast ? Math.max(Math.min(ad, 1) * SIDE_DIM, e * 0.78) : Math.min(ad, 1) * SIDE_DIM })
+                        gsap.set(dims[i], {
+                            opacity: isLast ? Math.max(Math.min(ad, 1) * SIDE_DIM, e * 0.78) : Math.min(ad, 1) * SIDE_DIM,
+                        })
                     })
 
                     const next = Math.round(p)
@@ -1072,7 +1101,7 @@ export default function Applications() {
                 measure()
                 render()
 
-                // Scroll rests only on a card or on the finished quote
+                // Scroll settles in the middle of each card's rest, or on the finished ending
                 let snapPoints: number[] = [0, 1]
 
                 const tl = gsap.timeline({
@@ -1085,7 +1114,8 @@ export default function Applications() {
                         anticipatePin: 1,
                         invalidateOnRefresh: true,
                         snap: {
-                            snapTo: (value) => gsap.utils.snap(snapPoints, value),
+                            // once past the last card, scrolling runs freely into the ending and on to the next section
+                            snapTo: (value) => (value > snapPoints[LAST] ? value : gsap.utils.snap(snapPoints, value)),
                             duration: reduceMotion ? 0.01 : { min: 0.25, max: 0.7 },
                             delay: 0.08,
                             ease: 'power2.out',
@@ -1097,24 +1127,24 @@ export default function Applications() {
                     },
                 })
 
-                tl.to(state, { value: LAST, ease: 'none', duration: INDEX_DURATION, onUpdate: render }, 0)
+                // Rest on card 0, move to card 1, rest, move to card 2 ... rest on the last card
+                for (let i = 0; i < LAST; i++) {
+                    tl.to(
+                        state,
+                        { value: i + 1, ease: 'power2.inOut', duration: STEP_MOVE, onUpdate: render },
+                        i * (STEP_MOVE + STEP_HOLD) + STEP_HOLD
+                    )
+                }
 
+                // Ending: the last card grows to fill the screen while the text and controls fade
                 const expand = gsap.timeline()
-
                 expand.to(state, { expand: 1, duration: 2, ease: 'power3.inOut', onUpdate: render }, 0)
                 expand.to([marks, explore], { autoAlpha: 0, duration: 0.5, ease: 'power1.out' }, 0)
                 expand.to([copy, details], { opacity: 0, y: -30, duration: 0.8, ease: 'power2.out' }, 0)
-                expand.to(quote, { autoAlpha: 1, duration: 0.3 }, 1)
-                expand.to(
-                    words,
-                    { yPercent: 0, duration: 0.9, ease: 'power3.out', stagger: 0.06 },
-                    1.05
-                )
-
-                tl.add(expand, `>+=${HOLD}`)
+                tl.add(expand, STRIP_DURATION + HOLD)
 
                 const total = tl.totalDuration()
-                snapPoints = [...projectTypes.map((_, i) => ((i / LAST) * INDEX_DURATION) / total), 1]
+                snapPoints = [...projectTypes.map((_, i) => restTime(i) / total), 1]
 
                 tlRef.current = tl
                 stRef.current = tl.scrollTrigger ?? null
@@ -1142,7 +1172,7 @@ export default function Applications() {
                         stage.style.userSelect = 'none'
                     }
                     if (!draggedRef.current) return
-                    const scrollPerCard = ((trigger.end - trigger.start) * (INDEX_DURATION / LAST)) / total
+                    const scrollPerCard = ((trigger.end - trigger.start) * (STEP_MOVE + STEP_HOLD)) / total
                     window.scrollTo(0, startScroll - dy * (scrollPerCard / DY))
                 }
 
@@ -1175,7 +1205,7 @@ export default function Applications() {
     return (
         <section
             ref={sectionRef}
-            aria-label="Project types"
+            aria-label="Sales channels"
             className="relative z-10 -mt-[100svh] w-full overflow-hidden bg-[#080a08]"
         >
             <div ref={stageRef} className="relative h-[100svh] min-h-[620px] w-full touch-pan-y overflow-hidden" style={{ color: VELLUM }}>
@@ -1208,16 +1238,26 @@ export default function Applications() {
                                 if (draggedRef.current || active) return
                                 selectProject(idx)
                             }}
-                            className={`invisible absolute left-0 top-0 overflow-hidden rounded-[22px] bg-[#10130f] shadow-[0_30px_80px_rgba(0,0,0,0.55)] will-change-transform ${active ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
+                            className={`absolute left-0 top-0 overflow-hidden rounded-[22px] bg-[#10130f] shadow-[0_30px_80px_rgba(0,0,0,0.55)] will-change-transform ${active ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
                         >
-                            <img
-                                src={project.imgSrc}
-                                alt={active ? project.title : ''}
-                                loading={idx < 2 ? 'eager' : 'lazy'}
-                                decoding="async"
-                                draggable={false}
-                                className="absolute inset-0 h-full w-full select-none object-contain object-center"
-                            />
+                            {failedVideos[idx] ? (
+                                <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(70%_60%_at_50%_40%,rgba(213,189,135,0.12),transparent_70%)]">
+                                    <span className="px-6 text-center text-[11px] uppercase tracking-[0.2em] text-[#d5bd87]/70">{project.title}</span>
+                                </div>
+                            ) : (
+                                <video
+                                    ref={(el) => { videoRefs.current[idx] = el }}
+                                    src={project.videoSrc}
+                                    aria-label={active ? project.title : undefined}
+                                    muted
+                                    loop
+                                    playsInline
+                                    preload={Math.abs(idx - activeIndex) <= 1 ? 'auto' : 'metadata'}
+                                    draggable={false}
+                                    onError={() => markFailed(idx, project.videoSrc)}
+                                    className="absolute inset-0 h-full w-full select-none object-cover object-center"
+                                />
+                            )}
                             <div ref={(el) => { dimRefs.current[idx] = el }} className="pointer-events-none absolute inset-0 bg-[#080a08] opacity-0" />
                         </div>
                     )
@@ -1225,39 +1265,41 @@ export default function Applications() {
 
                 <div
                     ref={copyRef}
-                    className="pointer-events-none absolute left-[6vw] right-[6vw] top-[8svh] z-30 text-left text-[#f7efdc] md:left-[5vw] md:right-auto md:top-[17svh] md:w-[20vw]"
+                    className="pointer-events-none absolute left-[5vw] right-[5vw] top-[5svh] z-30 text-left text-[#f7efdc] md:left-[4vw] md:right-auto md:top-[12svh] md:w-[21vw]"
                 >
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-[#d5bd87] sm:text-xs">
-                        Virtuaze / Project applications
-                    </span>
+                    <div className="inline-block rounded-full border border-[#d5bd87]/25 bg-[#0b0d0a]/40 px-2.5 py-1.5 backdrop-blur-sm">
+                        <span className="text-[9px] uppercase tracking-[0.18em] text-[#d5bd87] sm:text-xs">
+                            Virtuaze / Sales channels
+                        </span>
+                    </div>
                     <h2
-                        className="mt-2 max-w-[700px] text-3xl font-medium uppercase leading-[1.04] sm:text-4xl md:text-5xl"
+                        className="mt-3 max-w-[680px] text-[clamp(1.9rem,8vw,3rem)] font-medium uppercase leading-[0.92] tracking-[-0.05em] text-[#f7efdc] [overflow-wrap:anywhere] md:text-[clamp(1.8rem,3vw,3.8rem)]"
                         style={{ fontFamily: 'var(--font-decart)' }}
                     >
-                        One digital twin for every kind of project.
+                        Build it once. Sell everywhere.
                     </h2>
                 </div>
 
                 <div
                     ref={detailsRef}
-                    className="pointer-events-none absolute bottom-[15svh] left-[6vw] z-30 w-[88vw] text-[#f7efdc] md:bottom-[13svh] md:left-[5vw] md:w-[20vw]"
+                    className="pointer-events-none absolute bottom-[10svh] left-[5vw] z-30 w-[90vw] text-[#f7efdc] md:bottom-[12svh] md:left-[4vw] md:w-[21vw]"
                 >
                     {projectTypes.map((project, idx) => (
                         <div
                             key={project.title}
                             ref={(el) => { detailRefs.current[idx] = el }}
                             aria-hidden={idx !== activeIndex}
-                            className={`absolute bottom-0 left-0 right-0 will-change-[transform,opacity,filter] ${idx === 0 ? 'opacity-100' : 'opacity-0'}`}
+                            className={`absolute bottom-0 left-0 right-0 rounded-2xl border border-white/10 bg-[#0b0d0a]/70 px-3.5 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.24)] backdrop-blur-md will-change-[transform,opacity,filter] ${idx === 0 ? 'opacity-100' : 'opacity-0'}`}
                         >
-                            <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-[#d5bd87] sm:text-xs md:mb-2 md:gap-3">
-                                <span className="h-px w-7 bg-[#d5bd87]" />
-                                <span>Project type</span>
+                            <div className="mb-2 flex items-center gap-2 whitespace-nowrap text-[9px] uppercase tracking-[0.14em] text-[#d5bd87] sm:text-xs md:mb-2 md:gap-2 md:text-[10px] lg:gap-3 lg:text-xs">
+                                <span className="h-px w-5 bg-[#d5bd87] md:w-7" />
+                                <span>Channel</span>
                                 <span className="text-white/55">{String(idx + 1).padStart(2, '0')} / {String(projectTypes.length).padStart(2, '0')}</span>
                             </div>
-                            <h3 className="text-2xl uppercase leading-tight sm:text-3xl md:text-4xl" style={{ fontFamily: 'var(--font-decart)' }}>
+                            <h3 className="text-[clamp(1.5rem,6.5vw,2.4rem)] uppercase leading-[0.95] tracking-[-0.05em] text-[#f5efe5] [overflow-wrap:anywhere] md:text-[clamp(1.4rem,2.3vw,2.6rem)]" style={{ fontFamily: 'var(--font-decart)' }}>
                                 {project.title}
                             </h3>
-                            <p className="mt-2 max-w-[42ch] text-sm leading-relaxed text-white/75 sm:text-base md:mt-3 md:text-sm">
+                            <p className="mt-2 max-w-[42ch] text-[0.78rem] leading-relaxed text-white/80 sm:text-sm md:mt-3 md:text-sm">
                                 {project.subtitle}
                             </p>
                         </div>
@@ -1268,8 +1310,8 @@ export default function Applications() {
                     ref={exploreRef}
                     type="button"
                     onClick={() => selectProject((activeIndex + 1) % projectTypes.length)}
-                    className="group absolute bottom-[9svh] right-[6vw] z-40 inline-flex min-h-11 items-center gap-2 rounded-full border border-white/35 bg-black/30 px-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:border-[#d5bd87] hover:text-[#f5dfad] md:bottom-[13svh] md:right-[5vw] md:min-h-12 md:px-6 md:text-xs"
-                    aria-label="Explore the next project type"
+                    className="group absolute z-40 hidden min-h-11 items-center gap-2 rounded-full border border-white/35 bg-black/30 px-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:border-[#d5bd87] hover:text-[#f5dfad] md:bottom-[4svh] md:left-[4vw] md:inline-flex md:min-h-12 md:px-6 md:text-xs"
+                    aria-label="Show the next channel"
                 >
                     Explore
                     <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 md:h-4 md:w-4" />
@@ -1292,10 +1334,10 @@ export default function Applications() {
                             </button>
                         ))}
                         <span className="h-8 w-px bg-white/20" />
-                        <span className="text-[9px] tracking-[0.18em] text-white/65">06</span>
+                        <span className="text-[9px] tracking-[0.18em] text-white/65">{String(projectTypes.length).padStart(2, '0')}</span>
                     </div>
 
-                    <div className="pointer-events-auto absolute bottom-[2svh] left-1/2 flex -translate-x-1/2 items-center gap-1 md:hidden">
+                    <div className="pointer-events-auto absolute bottom-[3svh] left-1/2 flex -translate-x-1/2 items-center gap-1 md:hidden">
                         {projectTypes.map((project, idx) => (
                             <button
                                 key={project.title}
@@ -1310,7 +1352,6 @@ export default function Applications() {
                         ))}
                     </div>
                 </div>
-
             </div>
         </section>
     )

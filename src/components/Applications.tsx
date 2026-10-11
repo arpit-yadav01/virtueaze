@@ -1,3 +1,349 @@
+// // 'use client'
+
+// // import React, { useEffect, useRef, useState } from 'react'
+// // import gsap from 'gsap'
+// // import { ScrollTrigger } from 'gsap/ScrollTrigger'
+// // import { ArrowUpRight } from 'lucide-react'
+
+// // if (typeof window !== 'undefined') {
+// //     gsap.registerPlugin(ScrollTrigger)
+// // }
+
+// // interface ProjectTypeData {
+// //     title: string
+// //     subtitle: string
+// //     imgSrc: string
+// // }
+
+// // const projectTypes: ProjectTypeData[] = [
+// //     { title: 'Residential towers', subtitle: 'Full elevation and floor control.', imgSrc: 'https://framerusercontent.com/images/PIckQ7vs3QZXJ2eLyq91rmt3hLk.png?width=1399&height=670' },
+// //     { title: 'Luxury residences', subtitle: 'Material, detail and atmosphere in every room.', imgSrc: 'https://framerusercontent.com/images/qWNssr2VW9pk5zkdisoIYcc0Uo.png?width=1367&height=790' },
+// //     { title: 'Masterplans', subtitle: 'Navigate phases, amenities and the bigger picture.', imgSrc: 'https://framerusercontent.com/images/QSUDPXU7sOqM557B2LAeaCrKIhc.png?width=1316&height=791' },
+// //     { title: 'Villas & plots', subtitle: 'Plots, boundaries and custom villa walkthroughs.', imgSrc: 'https://framerusercontent.com/images/eKrcvOMsf6CXnBH0uTpWJli2vY.png?scale-down-to=1024&width=1180&height=900' },
+// //     { title: 'Commercial & retail', subtitle: 'Footfall, leasing layouts and retail possibilities.', imgSrc: 'https://framerusercontent.com/images/venMvyC03Nyji0T9rBpLlWjBjxo.png?width=1367&height=790' },
+// //     { title: 'International launches', subtitle: 'Touchscreen-ready experiences for every market.', imgSrc: 'https://framerusercontent.com/images/oytc7a861tIZUl4y8BOlpxFck.png?width=1419&height=790' },
+// // ]
+
+// // const INDEX_DURATION = 4.5
+// // const HOLD = 0.4
+// // const VELLUM = '#f7efdc'
+// // const SCRUB_DURATION = 6
+
+// // export default function Applications() {
+// //     const sectionRef = useRef<HTMLElement>(null)
+// //     const stageRef = useRef<HTMLDivElement>(null)
+// //     const copyRef = useRef<HTMLDivElement>(null)
+// //     const frameRef = useRef<HTMLDivElement>(null)
+// //     const marksRef = useRef<HTMLDivElement>(null)
+// //     const overlayRef = useRef<HTMLDivElement>(null)
+// //     const quoteRef = useRef<HTMLDivElement>(null)
+// //     const dragStartX = useRef<number | null>(null)
+
+// //     const [activeIndex, setActiveIndex] = useState(0)
+// //     const indexProxy = useRef({ value: 0 })
+// //     const lastIndex = useRef(0)
+// //     const stRef = useRef<ScrollTrigger | null>(null)
+// //     const tlRef = useRef<gsap.core.Timeline | null>(null)
+
+// //     const selectProject = (requestedIndex: number) => {
+// //         const nextIndex = Math.max(0, Math.min(projectTypes.length - 1, requestedIndex))
+// //         const trigger = stRef.current
+// //         const timeline = tlRef.current
+
+// //         if (!trigger || !timeline) {
+// //             indexProxy.current.value = nextIndex
+// //             lastIndex.current = nextIndex
+// //             setActiveIndex(nextIndex)
+// //             return
+// //         }
+
+// //         const indexTime = (nextIndex / (projectTypes.length - 1)) * INDEX_DURATION
+// //         const timelineProgress = indexTime / timeline.totalDuration()
+// //         const scrollTop = trigger.start + (trigger.end - trigger.start) * timelineProgress
+// //         const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+
+// //         window.scrollTo({ top: scrollTop, behavior })
+// //     }
+
+// //     const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+// //         if (event.pointerType === 'mouse' && event.button !== 0) return
+// //         dragStartX.current = event.clientX
+// //     }
+
+// //     const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+// //         if (dragStartX.current === null) return
+
+// //         const distance = event.clientX - dragStartX.current
+// //         dragStartX.current = null
+
+// //         if (Math.abs(distance) < 48) return
+// //         selectProject(activeIndex + (distance < 0 ? 1 : -1))
+// //     }
+
+// //     useEffect(() => {
+// //         const section = sectionRef.current
+// //         const stage = stageRef.current
+// //         const copy = copyRef.current
+// //         const frame = frameRef.current
+// //         const marks = marksRef.current
+// //         const overlay = overlayRef.current
+// //         const quote = quoteRef.current
+
+// //         if (!section || !stage || !copy || !frame || !marks || !overlay || !quote) return
+
+// //         const mm = gsap.matchMedia()
+
+// //         mm.add({ isDesktop: '(min-width: 768px)', isMobile: '(max-width: 767px)' }, (ctx) => {
+// //             const { isDesktop } = ctx.conditions as { isDesktop: boolean }
+
+// //             const rest = isDesktop
+// //                 ? { left: '27vw', top: '7svh', width: '68vw', height: '82svh' }
+// //                 : { left: '4vw', top: '26svh', width: '92vw', height: '44svh' }
+
+// //             const words = quote.querySelectorAll<HTMLElement>('.q-word')
+
+// //             gsap.set(frame, rest)
+// //             gsap.set(overlay, { opacity: 0.24 })
+// //             gsap.set(quote, { autoAlpha: 0 })
+// //             gsap.set(words, { yPercent: 115 })
+
+// //             gsap.fromTo(
+// //                 section,
+// //                 { borderTopLeftRadius: '50vw', borderTopRightRadius: '50vw' },
+// //                 {
+// //                     borderTopLeftRadius: '0vw',
+// //                     borderTopRightRadius: '0vw',
+// //                     ease: 'none',
+// //                     scrollTrigger: {
+// //                         trigger: section,
+// //                         start: 'top bottom',
+// //                         end: 'top top',
+// //                         scrub: true,
+// //                     },
+// //                 }
+// //             )
+
+// //             const tl = gsap.timeline({
+// //                 scrollTrigger: {
+// //                     trigger: section,
+// //                     start: 'top top',
+// //                     end: () => `+=${window.innerHeight * SCRUB_DURATION}`,
+// //                     scrub: 0.6,
+// //                     pin: stage,
+// //                     anticipatePin: 1,
+// //                     invalidateOnRefresh: true,
+// //                 },
+// //             })
+
+// //             tl.to(
+// //                 indexProxy.current,
+// //                 {
+// //                     value: projectTypes.length - 1,
+// //                     ease: 'none',
+// //                     duration: INDEX_DURATION,
+// //                     onUpdate: () => {
+// //                         const next = Math.round(indexProxy.current.value)
+// //                         if (next !== lastIndex.current) {
+// //                             lastIndex.current = next
+// //                             setActiveIndex(next)
+// //                         }
+// //                     },
+// //                 },
+// //                 0
+// //             )
+
+// //             const expand = gsap.timeline()
+
+// //             expand.to(
+// //                 frame,
+// //                 {
+// //                     left: 0,
+// //                     top: 0,
+// //                     width: '100vw',
+// //                     height: '100svh',
+// //                     duration: 2,
+// //                     ease: 'power3.inOut',
+// //                 },
+// //                 0
+// //             )
+// //             expand.to(marks, { opacity: 0, duration: 0.5, ease: 'power1.out' }, 0)
+// //             expand.to(
+// //                 copy,
+// //                 { opacity: 0, x: 0, y: -30, duration: 0.8, ease: 'power2.out' },
+// //                 0
+// //             )
+// //             expand.to(overlay, { opacity: 0.78, duration: 2, ease: 'power1.inOut' }, 0)
+// //             expand.to(quote, { autoAlpha: 1, duration: 0.3 }, 1)
+// //             expand.to(
+// //                 words,
+// //                 { yPercent: 0, duration: 0.9, ease: 'power3.out', stagger: 0.06 },
+// //                 1.05
+// //             )
+
+// //             tl.add(expand, `>+=${HOLD}`)
+
+// //             tlRef.current = tl
+// //             stRef.current = tl.scrollTrigger ?? null
+
+// //             return () => {
+// //                 tlRef.current = null
+// //                 stRef.current = null
+// //             }
+// //         })
+
+// //         return () => mm.revert()
+// //     }, [])
+
+// //     return (
+// //         <section
+// //             ref={sectionRef}
+// //             aria-label="Project types"
+// //             className="relative z-10 -mt-[100svh] w-full overflow-hidden bg-[#080a08]"
+// //         >
+// //             <div ref={stageRef} className="relative h-[100svh] min-h-[620px] w-full overflow-hidden" style={{ color: VELLUM }}>
+// //                 <div
+// //                     aria-hidden
+// //                     className="pointer-events-none absolute inset-0"
+// //                     style={{
+// //                         background:
+// //                             'radial-gradient(90% 80% at 50% 45%, rgba(77,91,71,0.2), transparent 72%), linear-gradient(135deg, #11140f 0%, #080a08 58%, #10120d 100%)',
+// //                     }}
+// //                 />
+// //                 <div
+// //                     aria-hidden
+// //                     className="pointer-events-none absolute inset-0 opacity-[0.045] mix-blend-screen"
+// //                     style={{
+// //                         backgroundImage:
+// //                             "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+// //                     }}
+// //                 />
+
+// //                 <div
+// //                     ref={copyRef}
+// //                     className="absolute left-[6vw] right-[6vw] top-[8svh] z-20 text-left text-[#f7efdc] md:left-[5vw] md:right-auto md:top-[17svh] md:w-[20vw]"
+// //                 >
+// //                     <span className="text-[8px] uppercase tracking-[0.24em] text-[#d5bd87] md:text-[10px]">
+// //                         Virtuaze / Project applications
+// //                     </span>
+// //                     <h2
+// //                         className="mt-2 max-w-[700px] text-2xl font-medium uppercase leading-[1.04] sm:text-3xl md:text-4xl"
+// //                         style={{ fontFamily: 'var(--font-decart)' }}
+// //                     >
+// //                         One digital twin for every kind of project.
+// //                     </h2>
+// //                 </div>
+
+// //                 <div
+// //                     ref={frameRef}
+// //                     onPointerDown={handlePointerDown}
+// //                     onPointerUp={handlePointerUp}
+// //                     onPointerCancel={() => { dragStartX.current = null }}
+// //                     className="absolute z-10 left-[4vw] top-[26svh] h-[44svh] w-[92vw] overflow-hidden bg-[#10130f] shadow-[0_36px_100px_rgba(0,0,0,0.45)] touch-pan-y cursor-grab active:cursor-grabbing md:left-[27vw] md:top-[7svh] md:h-[82svh] md:w-[68vw]"
+// //                 >
+// //                     <div className="relative h-full w-full overflow-hidden">
+// //                         {projectTypes.map((project, idx) => {
+// //                             const active = idx === activeIndex
+// //                             return (
+// //                                 <img
+// //                                     key={project.title}
+// //                                     src={project.imgSrc}
+// //                                     alt={active ? project.title : ''}
+// //                                     aria-hidden={!active}
+// //                                     loading={idx === 0 ? 'eager' : 'lazy'}
+// //                                     decoding="async"
+// //                                     draggable={false}
+// //                                     className={`absolute inset-0 h-full w-full object-contain object-center transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none ${active ? 'scale-100 opacity-100' : 'scale-[1.035] opacity-0'
+// //                                         }`}
+// //                                 />
+// //                             )
+// //                         })}
+
+// //                         <div ref={overlayRef} className="absolute inset-0 bg-gradient-to-t from-[#080a08]/95 via-[#080a08]/20 to-[#080a08]/35" />
+
+// //                     </div>
+// //                 </div>
+
+// //                 <div className="absolute bottom-[17svh] left-[6vw] z-20 max-w-[66vw] text-[#f7efdc] md:bottom-[13svh] md:left-[5vw] md:max-w-[20vw]">
+// //                     {projectTypes.map((project, idx) => {
+// //                         const active = idx === activeIndex
+// //                         return (
+// //                             <div
+// //                                 key={project.title}
+// //                                 aria-hidden={!active}
+// //                                 className={`absolute bottom-0 left-0 right-0 transition-[opacity,transform] duration-500 ease-out ${active ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
+// //                             >
+// //                                 <div className="mb-1 flex items-center gap-2 text-[8px] uppercase tracking-[0.2em] text-[#d5bd87] md:mb-2 md:gap-3 md:text-[10px]">
+// //                                     <span className="h-px w-7 bg-[#d5bd87]" />
+// //                                     <span>Project type</span>
+// //                                     <span className="text-white/55">{String(idx + 1).padStart(2, '0')} / {String(projectTypes.length).padStart(2, '0')}</span>
+// //                                 </div>
+// //                                 <h3 className="text-xl uppercase leading-tight sm:text-2xl md:text-4xl" style={{ fontFamily: 'var(--font-decart)' }}>
+// //                                     {project.title}
+// //                                 </h3>
+// //                                 <p className="mt-1 max-w-[42ch] text-[10px] leading-relaxed text-white/75 sm:text-xs md:mt-3 md:text-sm">
+// //                                     {project.subtitle}
+// //                                 </p>
+// //                             </div>
+// //                         )
+// //                     })}
+// //                 </div>
+
+// //                 <button
+// //                     type="button"
+// //                     onClick={() => selectProject((activeIndex + 1) % projectTypes.length)}
+// //                     className="group absolute bottom-[10svh] right-[6vw] z-30 inline-flex min-h-10 items-center gap-2 rounded-full border border-white/35 bg-black/30 px-4 text-[8px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm transition-colors hover:border-[#d5bd87] hover:text-[#f5dfad] md:bottom-[13svh] md:right-[5vw] md:min-h-12 md:px-6 md:text-[10px]"
+// //                     aria-label="Explore the next project type"
+// //                 >
+// //                     Explore
+// //                     <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 md:h-4 md:w-4" />
+// //                 </button>
+
+// //                 <div ref={marksRef} className="pointer-events-none absolute inset-0 z-30">
+// //                     <div className="pointer-events-auto absolute right-[2vw] top-1/2 hidden -translate-y-1/2 flex-col items-center gap-2 md:flex">
+// //                         <span className="text-[9px] tracking-[0.18em] text-white/65">01</span>
+// //                         <span className="h-8 w-px bg-white/20" />
+// //                         {projectTypes.map((project, idx) => (
+// //                             <button
+// //                                 key={project.title}
+// //                                 type="button"
+// //                                 onClick={() => selectProject(idx)}
+// //                                 aria-label={`Show ${project.title}`}
+// //                                 aria-current={idx === activeIndex ? 'true' : undefined}
+// //                                 className={`group relative h-6 w-6 rounded-full transition-colors ${idx === activeIndex ? 'bg-white/10' : 'hover:bg-white/10'}`}
+// //                             >
+// //                                 <span className={`absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-300 ${idx === activeIndex ? 'scale-150 bg-[#d5bd87]' : 'bg-white/45 group-hover:bg-white'}`} />
+// //                             </button>
+// //                         ))}
+// //                         <span className="h-8 w-px bg-white/20" />
+// //                         <span className="text-[9px] tracking-[0.18em] text-white/65">06</span>
+// //                     </div>
+
+// //                     <div className="pointer-events-auto absolute bottom-[3svh] left-1/2 flex -translate-x-1/2 items-center gap-1 md:hidden">
+// //                         {projectTypes.map((project, idx) => (
+// //                             <button
+// //                                 key={project.title}
+// //                                 type="button"
+// //                                 onClick={() => selectProject(idx)}
+// //                                 aria-label={`Show ${project.title}`}
+// //                                 aria-current={idx === activeIndex ? 'true' : undefined}
+// //                                 className={`h-9 min-w-9 rounded-full px-2 text-[8px] tracking-[0.1em] transition-all ${idx === activeIndex ? 'bg-white/10 text-[#d5bd87]' : 'text-white/50'}`}
+// //                             >
+// //                                 {String(idx + 1).padStart(2, '0')}
+// //                             </button>
+// //                         ))}
+// //                     </div>
+// //                 </div>
+
+// //             </div>
+// //         </section>
+// //     )
+// // }
+
+
+
+
+
+
 // 'use client'
 
 // import React, { useEffect, useRef, useState } from 'react'
@@ -24,20 +370,41 @@
 //     { title: 'International launches', subtitle: 'Touchscreen-ready experiences for every market.', imgSrc: 'https://framerusercontent.com/images/oytc7a861tIZUl4y8BOlpxFck.png?width=1419&height=790' },
 // ]
 
-// const INDEX_DURATION = 4.5
-// const HOLD = 0.4
+// const STEP_MOVE = 1 // scroll share for moving from one card to the next
+// const STEP_HOLD = 0.8 // scroll share where the strip rests on each card so its text can be read
+// const HOLD = 1.4
 // const VELLUM = '#f7efdc'
-// const SCRUB_DURATION = 6
+// const SCRUB_DURATION = 10
+
+// // Reel tuning
+// const CARD_GAP = 0.03 // gap between cards, as a share of the stage height
+// const IMAGE_DRIFT = 4 // how far the image lags behind its card while moving, in percent (0 at rest)
+// const SIDE_DIM = 0.38 // how dark the cards above and below the active one are
+// const MAX_BLUR = 18 // strongest blur on cards and text that are leaving, in px
+// const SHARP_ZONE = 0.25 // a card stays fully sharp until it is this far (a quarter of a card) from the centre
+// const TEXT_CLEAR_ZONE = 0.35 // project text stays fully sharp and visible until its card is this far from the centre
+// const TEXT_FADE = 0.2 // then it fades and blurs out over this much further movement
+
+// const LAST = projectTypes.length - 1
+// // Timeline position of the middle of card i's rest
+// const restTime = (i: number) => i * (STEP_MOVE + STEP_HOLD) + STEP_HOLD / 2
+// const STRIP_DURATION = LAST * STEP_MOVE + (LAST + 1) * STEP_HOLD
+// const CARD_BOX = 'left-[4vw] top-[31svh] h-[38svh] w-[92vw] md:left-[27vw] md:top-[7svh] md:h-[82svh] md:w-[68vw]'
 
 // export default function Applications() {
 //     const sectionRef = useRef<HTMLElement>(null)
 //     const stageRef = useRef<HTMLDivElement>(null)
 //     const copyRef = useRef<HTMLDivElement>(null)
-//     const frameRef = useRef<HTMLDivElement>(null)
+//     const detailsRef = useRef<HTMLDivElement>(null)
+//     const exploreRef = useRef<HTMLButtonElement>(null)
 //     const marksRef = useRef<HTMLDivElement>(null)
 //     const overlayRef = useRef<HTMLDivElement>(null)
-//     const quoteRef = useRef<HTMLDivElement>(null)
-//     const dragStartX = useRef<number | null>(null)
+//     const cursorRef = useRef<HTMLDivElement>(null)
+
+//     const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+//     const imageRefs = useRef<(HTMLDivElement | null)[]>([])
+//     const dimRefs = useRef<(HTMLDivElement | null)[]>([])
+//     const detailRefs = useRef<(HTMLDivElement | null)[]>([])
 
 //     const [activeIndex, setActiveIndex] = useState(0)
 //     const indexProxy = useRef({ value: 0 })
@@ -46,7 +413,7 @@
 //     const tlRef = useRef<gsap.core.Timeline | null>(null)
 
 //     const selectProject = (requestedIndex: number) => {
-//         const nextIndex = Math.max(0, Math.min(projectTypes.length - 1, requestedIndex))
+//         const nextIndex = Math.max(0, Math.min(LAST, requestedIndex))
 //         const trigger = stRef.current
 //         const timeline = tlRef.current
 
@@ -57,139 +424,218 @@
 //             return
 //         }
 
-//         const indexTime = (nextIndex / (projectTypes.length - 1)) * INDEX_DURATION
-//         const timelineProgress = indexTime / timeline.totalDuration()
+//         const timelineProgress = restTime(nextIndex) / timeline.totalDuration()
 //         const scrollTop = trigger.start + (trigger.end - trigger.start) * timelineProgress
 //         const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
 
 //         window.scrollTo({ top: scrollTop, behavior })
 //     }
 
-//     const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-//         if (event.pointerType === 'mouse' && event.button !== 0) return
-//         dragStartX.current = event.clientX
-//     }
-
-//     const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-//         if (dragStartX.current === null) return
-
-//         const distance = event.clientX - dragStartX.current
-//         dragStartX.current = null
-
-//         if (Math.abs(distance) < 48) return
-//         selectProject(activeIndex + (distance < 0 ? 1 : -1))
-//     }
-
 //     useEffect(() => {
 //         const section = sectionRef.current
 //         const stage = stageRef.current
 //         const copy = copyRef.current
-//         const frame = frameRef.current
+//         const details = detailsRef.current
+//         const explore = exploreRef.current
 //         const marks = marksRef.current
 //         const overlay = overlayRef.current
-//         const quote = quoteRef.current
+//         const cursor = cursorRef.current
+//         const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[]
+//         const images = imageRefs.current.filter(Boolean) as HTMLDivElement[]
+//         const dims = dimRefs.current.filter(Boolean) as HTMLDivElement[]
+//         const detailItems = detailRefs.current.filter(Boolean) as HTMLDivElement[]
+//         const lastCard = cards[LAST]
 
-//         if (!section || !stage || !copy || !frame || !marks || !overlay || !quote) return
+//         if (!section || !stage || !copy || !details || !explore || !marks || !overlay || !cursor || !lastCard) return
 
 //         const mm = gsap.matchMedia()
 
-//         mm.add({ isDesktop: '(min-width: 768px)', isMobile: '(max-width: 767px)' }, (ctx) => {
-//             const { isDesktop } = ctx.conditions as { isDesktop: boolean }
+//         mm.add(
+//             {
+//                 isDesktop: '(min-width: 768px)',
+//                 isMobile: '(max-width: 767px)',
+//                 reduceMotion: '(prefers-reduced-motion: reduce)',
+//             },
+//             (ctx) => {
+//                 const { isDesktop, reduceMotion } = ctx.conditions as { isDesktop: boolean; reduceMotion: boolean }
 
-//             const rest = isDesktop
-//                 ? { left: '27vw', top: '7svh', width: '68vw', height: '82svh' }
-//                 : { left: '4vw', top: '26svh', width: '92vw', height: '44svh' }
+//                 const rest = isDesktop
+//                     ? { left: '27vw', top: '7svh', width: '68vw', height: '82svh' }
+//                     : { left: '4vw', top: '31svh', width: '92vw', height: '38svh' }
 
-//             const words = quote.querySelectorAll<HTMLElement>('.q-word')
+//                 gsap.set(cards[0], rest)
+//                 gsap.set(overlay, { opacity: 0 })
 
-//             gsap.set(frame, rest)
-//             gsap.set(overlay, { opacity: 0.24 })
-//             gsap.set(quote, { autoAlpha: 0 })
-//             gsap.set(words, { yPercent: 115 })
+//                 // Distance from one card to the next on the strip
+//                 let pitch = 0
+//                 const measure = () => {
+//                     pitch = cards[0].offsetHeight + stage.offsetHeight * CARD_GAP
+//                 }
 
-//             gsap.fromTo(
-//                 section,
-//                 { borderTopLeftRadius: '50vw', borderTopRightRadius: '50vw' },
-//                 {
-//                     borderTopLeftRadius: '0vw',
-//                     borderTopRightRadius: '0vw',
-//                     ease: 'none',
+//                 // Places every card, image and text block for a fractional index (0 to 5)
+//                 const render = (p: number) => {
+//                     cards.forEach((card, i) => {
+//                         const d = i - p
+//                         const ad = Math.abs(d)
+//                         const away = Math.min(ad, 1) // 0 = active card, 1 = one full card away
+//                         const textAlpha = gsap.utils.clamp(0, 1, 1 - (ad - TEXT_CLEAR_ZONE) / TEXT_FADE)
+//                         // The active card stays sharp; blur only starts once a card is clearly moving away
+//                         const cardBlur = reduceMotion ? 0 : gsap.utils.clamp(0, MAX_BLUR, (ad - SHARP_ZONE) * 14)
+//                         const textBlur = reduceMotion || ad <= TEXT_CLEAR_ZONE ? 0 : Math.min((ad - TEXT_CLEAR_ZONE) * 40, 10)
+
+//                         gsap.set(card, {
+//                             y: d * pitch,
+//                             autoAlpha: ad > 1.9 ? 0 : 1,
+//                             filter: cardBlur > 0.1
+//                                 ? `blur(${cardBlur}px) brightness(${1 - away * 0.4}) saturate(${1.1 - away * 0.38})`
+//                                 : `brightness(${1 - away * 0.4}) saturate(${1.1 - away * 0.38})`,
+//                         })
+//                         gsap.set(images[i], {
+//                             yPercent: -d * IMAGE_DRIFT,
+//                             scale: 1 + away * 0.05,
+//                         })
+//                         gsap.set(dims[i], { opacity: away * SIDE_DIM })
+//                         gsap.set(detailItems[i], {
+//                             opacity: textAlpha,
+//                             y: ad <= TEXT_CLEAR_ZONE ? 0 : Math.sign(d) * (ad - TEXT_CLEAR_ZONE) * 40,
+//                             filter: textBlur ? `blur(${textBlur}px)` : 'none',
+//                         })
+//                     })
+
+//                     const next = Math.round(p)
+//                     if (next !== lastIndex.current) {
+//                         lastIndex.current = next
+//                         setActiveIndex(next)
+//                     }
+//                 }
+
+//                 measure()
+//                 render(indexProxy.current.value)
+
+//                 // Scroll rests only on a card or on the finished quote
+//                 let snapPoints: number[] = [0, 1]
+
+//                 const tl = gsap.timeline({
 //                     scrollTrigger: {
 //                         trigger: section,
-//                         start: 'top bottom',
-//                         end: 'top top',
-//                         scrub: true,
+//                         start: 'top top',
+//                         end: () => `+=${window.innerHeight * SCRUB_DURATION}`,
+//                         scrub: 0.6,
+//                         pin: stage,
+//                         anticipatePin: 1,
+//                         invalidateOnRefresh: true,
+//                         snap: {
+//                             snapTo: (value) => gsap.utils.snap(snapPoints, value),
+//                             duration: reduceMotion ? 0.01 : { min: 0.25, max: 0.7 },
+//                             delay: 0.08,
+//                             ease: 'power2.out',
+//                         },
+//                         onRefresh: () => {
+//                             measure()
+//                             render(indexProxy.current.value)
+//                         },
 //                     },
+//                 })
+
+//                 // Rest on card 0, move to card 1, rest, move to card 2 ... rest on the last card
+//                 for (let i = 0; i < LAST; i++) {
+//                     tl.to(
+//                         indexProxy.current,
+//                         {
+//                             value: i + 1,
+//                             ease: 'power2.inOut',
+//                             duration: STEP_MOVE,
+//                             onUpdate: () => render(indexProxy.current.value),
+//                         },
+//                         i * (STEP_MOVE + STEP_HOLD) + STEP_HOLD
+//                     )
 //                 }
-//             )
 
-//             const tl = gsap.timeline({
-//                 scrollTrigger: {
-//                     trigger: section,
-//                     start: 'top top',
-//                     end: () => `+=${window.innerHeight * SCRUB_DURATION}`,
-//                     scrub: 0.6,
-//                     pin: stage,
-//                     anticipatePin: 1,
-//                     invalidateOnRefresh: true,
-//                 },
-//             })
+//                 const expand = gsap.timeline()
 
-//             tl.to(
-//                 indexProxy.current,
-//                 {
-//                     value: projectTypes.length - 1,
-//                     ease: 'none',
-//                     duration: INDEX_DURATION,
-//                     onUpdate: () => {
-//                         const next = Math.round(indexProxy.current.value)
-//                         if (next !== lastIndex.current) {
-//                             lastIndex.current = next
-//                             setActiveIndex(next)
-//                         }
+//                 expand.to(
+//                     lastCard,
+//                     {
+//                         left: 0,
+//                         top: 0,
+//                         width: '100vw',
+//                         height: '100svh',
+//                         duration: 2,
+//                         ease: 'power3.inOut',
 //                     },
-//                 },
-//                 0
-//             )
+//                     0
+//                 )
+//                 expand.to([marks, explore], { autoAlpha: 0, duration: 0.5, ease: 'power1.out' }, 0)
+//                 expand.to([copy, details], { opacity: 0, y: -30, duration: 0.8, ease: 'power2.out' }, 0)
+//                 expand.to(overlay, { opacity: 0.78, duration: 2, ease: 'power1.inOut' }, 0)
 
-//             const expand = gsap.timeline()
+//                 // Starts only after the last card has settled and been held for a moment
+//                 tl.add(expand, STRIP_DURATION + HOLD)
 
-//             expand.to(
-//                 frame,
-//                 {
-//                     left: 0,
-//                     top: 0,
-//                     width: '100vw',
-//                     height: '100svh',
-//                     duration: 2,
-//                     ease: 'power3.inOut',
-//                 },
-//                 0
-//             )
-//             expand.to(marks, { opacity: 0, duration: 0.5, ease: 'power1.out' }, 0)
-//             expand.to(
-//                 copy,
-//                 { opacity: 0, x: 0, y: -30, duration: 0.8, ease: 'power2.out' },
-//                 0
-//             )
-//             expand.to(overlay, { opacity: 0.78, duration: 2, ease: 'power1.inOut' }, 0)
-//             expand.to(quote, { autoAlpha: 1, duration: 0.3 }, 1)
-//             expand.to(
-//                 words,
-//                 { yPercent: 0, duration: 0.9, ease: 'power3.out', stagger: 0.06 },
-//                 1.05
-//             )
+//                 const total = tl.totalDuration()
+//                 // Scroll settles in the middle of each card's rest, or on the finished ending
+//                 snapPoints = [...projectTypes.map((_, i) => restTime(i) / total), 1]
 
-//             tl.add(expand, `>+=${HOLD}`)
+//                 tlRef.current = tl
+//                 stRef.current = tl.scrollTrigger ?? null
 
-//             tlRef.current = tl
-//             stRef.current = tl.scrollTrigger ?? null
+//                 // Press and drag the strip with a mouse. Touch keeps native scrolling.
+//                 let dragging = false
+//                 let startY = 0
+//                 let startScroll = 0
 
-//             return () => {
-//                 tlRef.current = null
-//                 stRef.current = null
+//                 const onPointerDown = (event: PointerEvent) => {
+//                     if (event.pointerType !== 'mouse' || event.button !== 0) return
+//                     if ((event.target as HTMLElement).closest('button')) return
+//                     dragging = true
+//                     startY = event.clientY
+//                     startScroll = window.scrollY
+//                     stage.setPointerCapture(event.pointerId)
+//                     stage.style.userSelect = 'none'
+//                     cursor.textContent = 'Drag'
+//                     gsap.to(cursor, { scale: 0.76, duration: 0.25 })
+//                     event.preventDefault()
+//                 }
+
+//                 const onPointerMove = (event: PointerEvent) => {
+//                     moveCursorX(event.clientX - stage.getBoundingClientRect().left)
+//                     moveCursorY(event.clientY - stage.getBoundingClientRect().top)
+
+//                     const trigger = tl.scrollTrigger
+//                     if (!dragging || !trigger || !pitch) return
+//                     const scrollPerCard = ((trigger.end - trigger.start) * (STEP_MOVE + STEP_HOLD)) / total
+//                     window.scrollTo(0, startScroll - (event.clientY - startY) * (scrollPerCard / pitch))
+//                 }
+
+//                 const onPointerEnd = () => {
+//                     if (!dragging) return
+//                     dragging = false
+//                     stage.style.userSelect = ''
+//                     cursor.textContent = 'Scroll'
+//                     gsap.to(cursor, { scale: 1, duration: 0.25 })
+//                 }
+
+//                 // Ring that follows the mouse
+//                 gsap.set(cursor, { xPercent: -50, yPercent: -50, x: stage.offsetWidth / 2, y: stage.offsetHeight / 2 })
+//                 const moveCursorX = gsap.quickTo(cursor, 'x', { duration: 0.35, ease: 'power3.out' })
+//                 const moveCursorY = gsap.quickTo(cursor, 'y', { duration: 0.35, ease: 'power3.out' })
+
+//                 stage.addEventListener('pointerdown', onPointerDown)
+//                 stage.addEventListener('pointermove', onPointerMove)
+//                 stage.addEventListener('pointerup', onPointerEnd)
+//                 stage.addEventListener('pointercancel', onPointerEnd)
+
+//                 return () => {
+//                     stage.removeEventListener('pointerdown', onPointerDown)
+//                     stage.removeEventListener('pointermove', onPointerMove)
+//                     stage.removeEventListener('pointerup', onPointerEnd)
+//                     stage.removeEventListener('pointercancel', onPointerEnd)
+//                     stage.style.userSelect = ''
+//                     tlRef.current = null
+//                     stRef.current = null
+//                 }
 //             }
-//         })
+//         )
 
 //         return () => mm.revert()
 //     }, [])
@@ -200,7 +646,7 @@
 //             aria-label="Project types"
 //             className="relative z-10 -mt-[100svh] w-full overflow-hidden bg-[#080a08]"
 //         >
-//             <div ref={stageRef} className="relative h-[100svh] min-h-[620px] w-full overflow-hidden" style={{ color: VELLUM }}>
+//             <div ref={stageRef} className="relative h-[100svh] min-h-[620px] w-full touch-pan-y overflow-hidden" style={{ color: VELLUM }}>
 //                 <div
 //                     aria-hidden
 //                     className="pointer-events-none absolute inset-0"
@@ -220,78 +666,94 @@
 
 //                 <div
 //                     ref={copyRef}
-//                     className="absolute left-[6vw] right-[6vw] top-[8svh] z-20 text-left text-[#f7efdc] md:left-[5vw] md:right-auto md:top-[17svh] md:w-[20vw]"
+//                     className="pointer-events-none absolute left-[5vw] right-[5vw] top-[5svh] z-20 text-left text-[#f7efdc] md:left-[4vw] md:right-auto md:top-[14svh] md:w-[21vw]"
 //                 >
-//                     <span className="text-[8px] uppercase tracking-[0.24em] text-[#d5bd87] md:text-[10px]">
-//                         Virtuaze / Project applications
-//                     </span>
+//                     <div className="inline-block rounded-full border border-[#d5bd87]/25 bg-[#0b0d0a]/40 px-2.5 py-1.5 backdrop-blur-sm">
+//                         <span className="text-[9px] uppercase tracking-[0.18em] text-[#d5bd87] sm:text-xs">
+//                             Virtuaze / Project applications
+//                         </span>
+//                     </div>
 //                     <h2
-//                         className="mt-2 max-w-[700px] text-2xl font-medium uppercase leading-[1.04] sm:text-3xl md:text-4xl"
+//                         className="mt-3 max-w-[680px] text-[clamp(1.9rem,8vw,3rem)] font-medium uppercase leading-[0.92] tracking-[-0.05em] text-[#f7efdc] [overflow-wrap:anywhere] md:text-[clamp(2rem,3.3vw,4.4rem)]"
 //                         style={{ fontFamily: 'var(--font-decart)' }}
 //                     >
 //                         One digital twin for every kind of project.
 //                     </h2>
 //                 </div>
 
-//                 <div
-//                     ref={frameRef}
-//                     onPointerDown={handlePointerDown}
-//                     onPointerUp={handlePointerUp}
-//                     onPointerCancel={() => { dragStartX.current = null }}
-//                     className="absolute z-10 left-[4vw] top-[26svh] h-[44svh] w-[92vw] overflow-hidden bg-[#10130f] shadow-[0_36px_100px_rgba(0,0,0,0.45)] touch-pan-y cursor-grab active:cursor-grabbing md:left-[27vw] md:top-[7svh] md:h-[82svh] md:w-[68vw]"
-//                 >
-//                     <div className="relative h-full w-full overflow-hidden">
-//                         {projectTypes.map((project, idx) => {
-//                             const active = idx === activeIndex
-//                             return (
+//                 {/* The reel: one card per project type on a vertical strip */}
+//                 {projectTypes.map((project, idx) => {
+//                     const active = idx === activeIndex
+//                     const isLast = idx === LAST
+//                     return (
+//                         <div
+//                             key={project.title}
+//                             ref={(el) => { cardRefs.current[idx] = el }}
+//                             aria-hidden={!active}
+//                             className={`absolute ${CARD_BOX} ${isLast ? 'z-[11]' : 'z-10'} cursor-grab overflow-hidden bg-[#10130f] shadow-[0_36px_100px_rgba(0,0,0,0.45)] will-change-transform active:cursor-grabbing`}
+//                         >
+//                             <div ref={(el) => { imageRefs.current[idx] = el }} className="absolute inset-0 will-change-transform">
+//                                 {/* Blurred copy fills the space around pictures that are wider or taller than the card */}
 //                                 <img
-//                                     key={project.title}
 //                                     src={project.imgSrc}
-//                                     alt={active ? project.title : ''}
-//                                     aria-hidden={!active}
-//                                     loading={idx === 0 ? 'eager' : 'lazy'}
+//                                     alt=""
+//                                     aria-hidden="true"
+//                                     loading="eager"
 //                                     decoding="async"
 //                                     draggable={false}
-//                                     className={`absolute inset-0 h-full w-full object-contain object-center transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none ${active ? 'scale-100 opacity-100' : 'scale-[1.035] opacity-0'
-//                                         }`}
+//                                     className="absolute inset-0 h-full w-full scale-110 select-none object-cover object-center opacity-50 blur-2xl"
 //                                 />
-//                             )
-//                         })}
-
-//                         <div ref={overlayRef} className="absolute inset-0 bg-gradient-to-t from-[#080a08]/95 via-[#080a08]/20 to-[#080a08]/35" />
-
-//                     </div>
-//                 </div>
-
-//                 <div className="absolute bottom-[17svh] left-[6vw] z-20 max-w-[66vw] text-[#f7efdc] md:bottom-[13svh] md:left-[5vw] md:max-w-[20vw]">
-//                     {projectTypes.map((project, idx) => {
-//                         const active = idx === activeIndex
-//                         return (
-//                             <div
-//                                 key={project.title}
-//                                 aria-hidden={!active}
-//                                 className={`absolute bottom-0 left-0 right-0 transition-[opacity,transform] duration-500 ease-out ${active ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
-//                             >
-//                                 <div className="mb-1 flex items-center gap-2 text-[8px] uppercase tracking-[0.2em] text-[#d5bd87] md:mb-2 md:gap-3 md:text-[10px]">
-//                                     <span className="h-px w-7 bg-[#d5bd87]" />
-//                                     <span>Project type</span>
-//                                     <span className="text-white/55">{String(idx + 1).padStart(2, '0')} / {String(projectTypes.length).padStart(2, '0')}</span>
-//                                 </div>
-//                                 <h3 className="text-xl uppercase leading-tight sm:text-2xl md:text-4xl" style={{ fontFamily: 'var(--font-decart)' }}>
-//                                     {project.title}
-//                                 </h3>
-//                                 <p className="mt-1 max-w-[42ch] text-[10px] leading-relaxed text-white/75 sm:text-xs md:mt-3 md:text-sm">
-//                                     {project.subtitle}
-//                                 </p>
+//                                 {/* The whole picture, centred and never cropped */}
+//                                 {/* All six load straight away: the cards sit hidden below the pinned area,
+//                                     so lazy loading would only start fetching once a card was already on screen */}
+//                                 <img
+//                                     src={project.imgSrc}
+//                                     alt={active ? project.title : ''}
+//                                     loading="eager"
+//                                     decoding="async"
+//                                     draggable={false}
+//                                     onError={() => console.warn('[Applications] image failed to load:', project.imgSrc)}
+//                                     className="absolute inset-0 h-full w-full select-none object-contain object-center"
+//                                 />
 //                             </div>
-//                         )
-//                     })}
+//                             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#070907]/65 via-[#070907]/20 to-transparent" />
+//                             {isLast && <div ref={overlayRef} className="absolute inset-0 bg-[#080a08] opacity-0" />}
+//                             <div ref={(el) => { dimRefs.current[idx] = el }} className="pointer-events-none absolute inset-0 bg-[#080a08] opacity-0" />
+//                         </div>
+//                     )
+//                 })}
+
+//                 <div
+//                     ref={detailsRef}
+//                     className="pointer-events-none absolute bottom-[10svh] left-[5vw] z-20 w-[90vw] text-[#f7efdc] md:bottom-[11svh] md:left-[4vw] md:w-[21vw]"
+//                 >
+//                     {projectTypes.map((project, idx) => (
+//                         <div
+//                             key={project.title}
+//                             ref={(el) => { detailRefs.current[idx] = el }}
+//                             aria-hidden={idx !== activeIndex}
+//                             className={`absolute bottom-0 left-0 right-0 rounded-2xl border border-white/10 bg-[#0b0d0a]/50 px-3.5 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.24)] backdrop-blur-[2px] will-change-[transform,opacity,filter] ${idx === 0 ? 'opacity-100' : 'opacity-0'}`}
+//                         >
+//                             <div className="mb-2 flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-[#d5bd87] sm:text-xs md:mb-2 md:gap-3">
+//                                 <span className="h-px w-5 bg-[#d5bd87] md:w-7" />
+//                                 <span>Project type</span>
+//                                 <span className="text-white/55">{String(idx + 1).padStart(2, '0')} / {String(projectTypes.length).padStart(2, '0')}</span>
+//                             </div>
+//                             <h3 className="text-[clamp(1.5rem,6.5vw,2.4rem)] uppercase leading-[0.95] tracking-[-0.05em] text-[#f5efe5] [overflow-wrap:anywhere] md:text-[clamp(1.4rem,2.3vw,2.6rem)]" style={{ fontFamily: 'var(--font-decart)' }}>
+//                                 {project.title}
+//                             </h3>
+//                             <p className="mt-2 max-w-[42ch] text-[0.78rem] leading-relaxed text-white/80 sm:text-sm md:mt-3 md:text-sm">
+//                                 {project.subtitle}
+//                             </p>
+//                         </div>
+//                     ))}
 //                 </div>
 
 //                 <button
+//                     ref={exploreRef}
 //                     type="button"
 //                     onClick={() => selectProject((activeIndex + 1) % projectTypes.length)}
-//                     className="group absolute bottom-[10svh] right-[6vw] z-30 inline-flex min-h-10 items-center gap-2 rounded-full border border-white/35 bg-black/30 px-4 text-[8px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm transition-colors hover:border-[#d5bd87] hover:text-[#f5dfad] md:bottom-[13svh] md:right-[5vw] md:min-h-12 md:px-6 md:text-[10px]"
+//                     className="group absolute bottom-[10svh] right-[6vw] z-30 hidden min-h-11 items-center gap-2 rounded-full border border-white/35 bg-black/30 px-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:border-[#d5bd87] hover:text-[#f5dfad] md:bottom-[11svh] md:right-[5vw] md:inline-flex md:min-h-12 md:px-6 md:text-xs"
 //                     aria-label="Explore the next project type"
 //                 >
 //                     Explore
@@ -299,6 +761,15 @@
 //                 </button>
 
 //                 <div ref={marksRef} className="pointer-events-none absolute inset-0 z-30">
+//                     {/* Ring that follows the mouse; shown only on devices with a mouse */}
+//                     <div
+//                         ref={cursorRef}
+//                         aria-hidden
+//                         className="absolute left-0 top-0 hidden h-[84px] w-[84px] items-center justify-center rounded-full border border-[#f7efdc]/60 text-[9px] uppercase tracking-[0.24em] text-[#f7efdc] [@media(hover:hover)_and_(pointer:fine)]:flex"
+//                     >
+//                         Scroll
+//                     </div>
+
 //                     <div className="pointer-events-auto absolute right-[2vw] top-1/2 hidden -translate-y-1/2 flex-col items-center gap-2 md:flex">
 //                         <span className="text-[9px] tracking-[0.18em] text-white/65">01</span>
 //                         <span className="h-8 w-px bg-white/20" />
@@ -341,8 +812,6 @@
 
 
 
-
-
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
@@ -369,59 +838,62 @@ const projectTypes: ProjectTypeData[] = [
     { title: 'International launches', subtitle: 'Touchscreen-ready experiences for every market.', imgSrc: 'https://framerusercontent.com/images/oytc7a861tIZUl4y8BOlpxFck.png?width=1419&height=790' },
 ]
 
-const INDEX_DURATION = 9.5
-const HOLD = 1.4
 const VELLUM = '#f7efdc'
-const SCRUB_DURATION = 10
+const SCRUB_DURATION = 10 // how many screen-heights of scrolling the whole section takes
+const STEP_MOVE = 1 // scroll share for moving from one card to the next
+const STEP_HOLD = 0.8 // scroll share where the gallery rests on each card so its text can be read
+const HOLD = 1.4 // pause on the last card before the ending
 
-// Reel tuning
-const CARD_GAP = 0.03 // gap between cards, as a share of the stage height
-const IMAGE_DRIFT = 4 // how far the image lags behind its card while moving, in percent (0 at rest)
-const SIDE_DIM = 0.38 // how dark the cards above and below the active one are
-const MAX_BLUR = 18 // strongest blur on cards and text that are leaving, in px
-const SHARP_ZONE = 0.25 // a card stays fully sharp until it is this far (a quarter of a card) from the centre
+// Gallery tuning
+const CARD_RATIO = 1.7 // card width divided by height
+const SIDE_SCALE = 0.55 // size of the cards before and after the active one
+const TILT = 10 // lean of the side cards, in degrees
+const SIDE_DIM = 0.35 // how dark the side cards are
+const LEAN = 5 // how much cards skew while moving, in degrees (0 turns it off)
+const RADIUS = 22 // card corner radius, in px
+const TEXT_CLEAR_ZONE = 0.35 // project text stays fully sharp until its card is this far from the centre
+const TEXT_FADE = 0.2 // then it fades and blurs out over this much further movement
 
 const LAST = projectTypes.length - 1
-const CARD_BOX = 'left-[4vw] top-[31svh] h-[38svh] w-[92vw] md:left-[27vw] md:top-[7svh] md:h-[82svh] md:w-[68vw]'
+// Timeline position of the middle of card i's rest
+const restTime = (i: number) => i * (STEP_MOVE + STEP_HOLD) + STEP_HOLD / 2
+const STRIP_DURATION = LAST * STEP_MOVE + (LAST + 1) * STEP_HOLD
 
-export default function Applications() {
+export default function ApplicationsGallery() {
     const sectionRef = useRef<HTMLElement>(null)
     const stageRef = useRef<HTMLDivElement>(null)
     const copyRef = useRef<HTMLDivElement>(null)
     const detailsRef = useRef<HTMLDivElement>(null)
     const exploreRef = useRef<HTMLButtonElement>(null)
     const marksRef = useRef<HTMLDivElement>(null)
-    const overlayRef = useRef<HTMLDivElement>(null)
-    const cursorRef = useRef<HTMLDivElement>(null)
 
     const cardRefs = useRef<(HTMLDivElement | null)[]>([])
-    const imageRefs = useRef<(HTMLDivElement | null)[]>([])
     const dimRefs = useRef<(HTMLDivElement | null)[]>([])
     const detailRefs = useRef<(HTMLDivElement | null)[]>([])
 
     const [activeIndex, setActiveIndex] = useState(0)
-    const indexProxy = useRef({ value: 0 })
+    const proxy = useRef({ value: 0, expand: 0 })
     const lastIndex = useRef(0)
+    const draggedRef = useRef(false)
     const stRef = useRef<ScrollTrigger | null>(null)
     const tlRef = useRef<gsap.core.Timeline | null>(null)
+
+    // Pictures that could not be downloaded; those cards show a plain panel instead of a broken image
+    const [failedImages, setFailedImages] = useState<Record<number, boolean>>({})
+    const markFailed = (idx: number, src: string) => {
+        console.warn('[ApplicationsGallery] image failed to load:', src)
+        setFailedImages((prev) => (prev[idx] ? prev : { ...prev, [idx]: true }))
+    }
 
     const selectProject = (requestedIndex: number) => {
         const nextIndex = Math.max(0, Math.min(LAST, requestedIndex))
         const trigger = stRef.current
         const timeline = tlRef.current
+        if (!trigger || !timeline) return
 
-        if (!trigger || !timeline) {
-            indexProxy.current.value = nextIndex
-            lastIndex.current = nextIndex
-            setActiveIndex(nextIndex)
-            return
-        }
-
-        const indexTime = (nextIndex / LAST) * INDEX_DURATION
-        const timelineProgress = indexTime / timeline.totalDuration()
+        const timelineProgress = restTime(nextIndex) / timeline.totalDuration()
         const scrollTop = trigger.start + (trigger.end - trigger.start) * timelineProgress
         const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
-
         window.scrollTo({ top: scrollTop, behavior })
     }
 
@@ -432,15 +904,11 @@ export default function Applications() {
         const details = detailsRef.current
         const explore = exploreRef.current
         const marks = marksRef.current
-        const overlay = overlayRef.current
-        const cursor = cursorRef.current
         const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[]
-        const images = imageRefs.current.filter(Boolean) as HTMLDivElement[]
         const dims = dimRefs.current.filter(Boolean) as HTMLDivElement[]
         const detailItems = detailRefs.current.filter(Boolean) as HTMLDivElement[]
-        const lastCard = cards[LAST]
 
-        if (!section || !stage || !copy || !details || !explore || !marks || !overlay || !cursor || !lastCard) return
+        if (!section || !stage || !copy || !details || !explore || !marks || cards.length !== projectTypes.length) return
 
         const mm = gsap.matchMedia()
 
@@ -452,47 +920,78 @@ export default function Applications() {
             },
             (ctx) => {
                 const { isDesktop, reduceMotion } = ctx.conditions as { isDesktop: boolean; reduceMotion: boolean }
+                const clamp = gsap.utils.clamp
+                const state = proxy.current
 
-                const rest = isDesktop
-                    ? { left: '27vw', top: '7svh', width: '68vw', height: '82svh' }
-                    : { left: '4vw', top: '31svh', width: '92vw', height: '38svh' }
-
-                gsap.set(cards[0], rest)
-                gsap.set(overlay, { opacity: 0 })
-
-                // Distance from one card to the next on the strip
-                let pitch = 0
+                // Card size, the active card's centre, and the step from one card to the next along the diagonal
+                let sw = 0, sh = 0, W = 0, H = 0, CX = 0, CY = 0, DX = 0, DY = 0
                 const measure = () => {
-                    pitch = cards[0].offsetHeight + stage.offsetHeight * CARD_GAP
+                    sw = stage.offsetWidth
+                    sh = stage.offsetHeight
+                    if (isDesktop) {
+                        W = Math.min(sw * 0.44, sh * 0.6 * CARD_RATIO)
+                        CX = sw * 0.6; CY = sh * 0.5; DX = sw * 0.17; DY = sh * 0.42
+                    } else {
+                        W = sw * 0.8
+                        CX = sw * 0.5; CY = sh * 0.47; DX = sw * 0.3; DY = sh * 0.21
+                    }
+                    H = W / CARD_RATIO
                 }
 
-                // Places every card, image and text block for a fractional index (0 to 5)
-                const render = (p: number) => {
+                let lean = 0
+
+                // Places every card and text block for the current index (0 to 5) and ending amount (0 to 1)
+                const render = () => {
+                    const p = state.value
+                    const e = state.expand
+
                     cards.forEach((card, i) => {
                         const d = i - p
                         const ad = Math.abs(d)
-                        const away = Math.min(ad, 1) // 0 = active card, 1 = one full card away
-                        const textAlpha = gsap.utils.clamp(0, 1, 1 - ad * 1.8)
-                        // The active card stays sharp; blur only starts once a card is clearly moving away
-                        const cardBlur = reduceMotion ? 0 : gsap.utils.clamp(0, MAX_BLUR, (ad - SHARP_ZONE) * 14)
-                        const textBlur = reduceMotion || ad < 0.02 ? 0 : Math.min(ad * 16, MAX_BLUR)
+                        const isLast = i === LAST
 
-                        gsap.set(card, {
-                            y: d * pitch,
-                            autoAlpha: ad > 1.9 ? 0 : 1,
-                            filter: cardBlur > 0.1
-                                ? `blur(${cardBlur}px) brightness(${1 - away * 0.4}) saturate(${1.1 - away * 0.38})`
-                                : `brightness(${1 - away * 0.4}) saturate(${1.1 - away * 0.38})`,
-                        })
-                        gsap.set(images[i], {
-                            yPercent: -d * IMAGE_DRIFT,
-                            scale: 1.03 + away * 0.05,
-                        })
-                        gsap.set(dims[i], { opacity: away * SIDE_DIM })
+                        const textAlpha = clamp(0, 1, 1 - (ad - TEXT_CLEAR_ZONE) / TEXT_FADE)
+                        const textBlur = reduceMotion || ad <= TEXT_CLEAR_ZONE ? 0 : Math.min((ad - TEXT_CLEAR_ZONE) * 40, 10)
                         gsap.set(detailItems[i], {
                             opacity: textAlpha,
-                            y: d * 14,
+                            y: ad <= TEXT_CLEAR_ZONE ? 0 : Math.sign(d) * (ad - TEXT_CLEAR_ZONE) * 40,
                             filter: textBlur ? `blur(${textBlur}px)` : 'none',
+                        })
+
+                        if (ad > 2.5) {
+                            gsap.set(card, { autoAlpha: 0 })
+                            return
+                        }
+
+                        let w = W, h = H
+                        let cx = CX + d * DX, cy = CY + d * DY
+                        let alpha = ad <= 1 ? 1 : clamp(0, 1, 1 - (ad - 1) * 0.8)
+                        const scale = ad <= 1 ? 1 - (1 - SIDE_SCALE) * ad : Math.max(0.4, SIDE_SCALE - 0.12 * (ad - 1))
+
+                        if (isLast) {
+                            w = W + (sw - W) * e
+                            h = H + (sh - H) * e
+                            cx += (sw / 2 - cx) * e
+                            cy += (sh / 2 - cy) * e
+                        } else {
+                            alpha *= clamp(0, 1, 1 - e * 3)
+                        }
+
+                        gsap.set(card, {
+                            x: cx - w / 2,
+                            y: cy - h / 2,
+                            width: w,
+                            height: h,
+                            scale,
+                            rotation: clamp(-1.5, 1.5, d) * TILT,
+                            skewY: lean * LEAN * (1 - e),
+                            autoAlpha: alpha,
+                            zIndex: 20 - Math.round(ad * 4) + (isLast && e > 0 ? 10 : 0),
+                            borderRadius: isLast ? RADIUS * (1 - e) : RADIUS,
+                            filter: ad > 1 && !reduceMotion ? `blur(${(ad - 1) * 6}px)` : 'none',
+                        })
+                        gsap.set(dims[i], {
+                            opacity: isLast ? Math.max(Math.min(ad, 1) * SIDE_DIM, e * 0.78) : Math.min(ad, 1) * SIDE_DIM,
                         })
                     })
 
@@ -503,10 +1002,22 @@ export default function Applications() {
                     }
                 }
 
-                measure()
-                render(indexProxy.current.value)
+                // Cards lean with scroll speed and settle back when it stops
+                let lastP = state.value
+                const tick = () => {
+                    const target = reduceMotion ? 0 : clamp(-1, 1, (state.value - lastP) * 14)
+                    lastP = state.value
+                    if (target === 0 && lean === 0) return
+                    lean += (target - lean) * 0.14
+                    if (Math.abs(lean) < 0.002) lean = 0
+                    render()
+                }
+                gsap.ticker.add(tick)
 
-                // Scroll rests only on a card or on the finished quote
+                measure()
+                render()
+
+                // Scroll settles in the middle of each card's rest, or on the finished ending
                 let snapPoints: number[] = [0, 1]
 
                 const tl = gsap.timeline({
@@ -526,100 +1037,76 @@ export default function Applications() {
                         },
                         onRefresh: () => {
                             measure()
-                            render(indexProxy.current.value)
+                            render()
                         },
                     },
                 })
 
-                tl.to(
-                    indexProxy.current,
-                    {
-                        value: LAST,
-                        ease: 'none',
-                        duration: INDEX_DURATION,
-                        onUpdate: () => render(indexProxy.current.value),
-                    },
-                    0
-                )
+                // Rest on card 0, move to card 1, rest, move to card 2 ... rest on the last card
+                for (let i = 0; i < LAST; i++) {
+                    tl.to(
+                        state,
+                        { value: i + 1, ease: 'power2.inOut', duration: STEP_MOVE, onUpdate: render },
+                        i * (STEP_MOVE + STEP_HOLD) + STEP_HOLD
+                    )
+                }
 
+                // Ending: the last card grows to fill the screen while the text and controls fade
                 const expand = gsap.timeline()
-
-                expand.to(
-                    lastCard,
-                    {
-                        left: 0,
-                        top: 0,
-                        width: '100vw',
-                        height: '100svh',
-                        duration: 2,
-                        ease: 'power3.inOut',
-                    },
-                    0
-                )
+                expand.to(state, { expand: 1, duration: 2, ease: 'power3.inOut', onUpdate: render }, 0)
                 expand.to([marks, explore], { autoAlpha: 0, duration: 0.5, ease: 'power1.out' }, 0)
                 expand.to([copy, details], { opacity: 0, y: -30, duration: 0.8, ease: 'power2.out' }, 0)
-                expand.to(overlay, { opacity: 0.78, duration: 2, ease: 'power1.inOut' }, 0)
-
-                // Starts only after the last card has settled and been held for a moment
-                tl.add(expand, INDEX_DURATION + HOLD)
+                tl.add(expand, STRIP_DURATION + HOLD)
 
                 const total = tl.totalDuration()
-                snapPoints = [...projectTypes.map((_, i) => ((i / LAST) * INDEX_DURATION) / total), 1]
+                snapPoints = [...projectTypes.map((_, i) => restTime(i) / total), 1]
 
                 tlRef.current = tl
                 stRef.current = tl.scrollTrigger ?? null
 
-                // Press and drag the strip with a mouse. Touch keeps native scrolling.
+                // Press and drag with a mouse. Touch keeps native scrolling.
                 let dragging = false
                 let startY = 0
                 let startScroll = 0
 
                 const onPointerDown = (event: PointerEvent) => {
+                    draggedRef.current = false
                     if (event.pointerType !== 'mouse' || event.button !== 0) return
                     if ((event.target as HTMLElement).closest('button')) return
                     dragging = true
                     startY = event.clientY
                     startScroll = window.scrollY
-                    stage.setPointerCapture(event.pointerId)
-                    stage.style.userSelect = 'none'
-                    cursor.textContent = 'Drag'
-                    gsap.to(cursor, { scale: 0.76, duration: 0.25 })
-                    event.preventDefault()
                 }
 
                 const onPointerMove = (event: PointerEvent) => {
-                    moveCursorX(event.clientX - stage.getBoundingClientRect().left)
-                    moveCursorY(event.clientY - stage.getBoundingClientRect().top)
-
                     const trigger = tl.scrollTrigger
-                    if (!dragging || !trigger || !pitch) return
-                    const scrollPerCard = ((trigger.end - trigger.start) * (INDEX_DURATION / LAST)) / total
-                    window.scrollTo(0, startScroll - (event.clientY - startY) * (scrollPerCard / pitch))
+                    if (!dragging || !trigger || !DY) return
+                    const dy = event.clientY - startY
+                    if (Math.abs(dy) > 6) {
+                        draggedRef.current = true
+                        stage.style.userSelect = 'none'
+                    }
+                    if (!draggedRef.current) return
+                    const scrollPerCard = ((trigger.end - trigger.start) * (STEP_MOVE + STEP_HOLD)) / total
+                    window.scrollTo(0, startScroll - dy * (scrollPerCard / DY))
                 }
 
                 const onPointerEnd = () => {
-                    if (!dragging) return
                     dragging = false
                     stage.style.userSelect = ''
-                    cursor.textContent = 'Scroll'
-                    gsap.to(cursor, { scale: 1, duration: 0.25 })
                 }
 
-                // Ring that follows the mouse
-                gsap.set(cursor, { xPercent: -50, yPercent: -50, x: stage.offsetWidth / 2, y: stage.offsetHeight / 2 })
-                const moveCursorX = gsap.quickTo(cursor, 'x', { duration: 0.35, ease: 'power3.out' })
-                const moveCursorY = gsap.quickTo(cursor, 'y', { duration: 0.35, ease: 'power3.out' })
-
                 stage.addEventListener('pointerdown', onPointerDown)
-                stage.addEventListener('pointermove', onPointerMove)
-                stage.addEventListener('pointerup', onPointerEnd)
-                stage.addEventListener('pointercancel', onPointerEnd)
+                window.addEventListener('pointermove', onPointerMove)
+                window.addEventListener('pointerup', onPointerEnd)
+                window.addEventListener('pointercancel', onPointerEnd)
 
                 return () => {
+                    gsap.ticker.remove(tick)
                     stage.removeEventListener('pointerdown', onPointerDown)
-                    stage.removeEventListener('pointermove', onPointerMove)
-                    stage.removeEventListener('pointerup', onPointerEnd)
-                    stage.removeEventListener('pointercancel', onPointerEnd)
+                    window.removeEventListener('pointermove', onPointerMove)
+                    window.removeEventListener('pointerup', onPointerEnd)
+                    window.removeEventListener('pointercancel', onPointerEnd)
                     stage.style.userSelect = ''
                     tlRef.current = null
                     stRef.current = null
@@ -654,9 +1141,58 @@ export default function Applications() {
                     }}
                 />
 
+                {/* The gallery: cards travel a diagonal path; the active one is large and upright */}
+                {projectTypes.map((project, idx) => {
+                    const active = idx === activeIndex
+                    return (
+                        <div
+                            key={project.title}
+                            ref={(el) => { cardRefs.current[idx] = el }}
+                            aria-hidden={!active}
+                            onClick={() => {
+                                if (draggedRef.current || active) return
+                                selectProject(idx)
+                            }}
+                            className={`invisible absolute left-0 top-0 overflow-hidden rounded-[22px] bg-[#10130f] shadow-[0_30px_80px_rgba(0,0,0,0.55)] will-change-transform ${active ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
+                        >
+                            {failedImages[idx] ? (
+                                <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(70%_60%_at_50%_40%,rgba(213,189,135,0.12),transparent_70%)]">
+                                    <span className="px-6 text-center text-[11px] uppercase tracking-[0.2em] text-[#d5bd87]/70">{project.title}</span>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Blurred copy fills the space around pictures that are wider or taller than the card */}
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={project.imgSrc}
+                                        alt=""
+                                        aria-hidden="true"
+                                        loading="eager"
+                                        decoding="async"
+                                        draggable={false}
+                                        className="absolute inset-0 h-full w-full scale-110 select-none object-cover object-center opacity-50 blur-2xl"
+                                    />
+                                    {/* The whole picture, centred and never cropped */}
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={project.imgSrc}
+                                        alt={active ? project.title : ''}
+                                        loading="eager"
+                                        decoding="async"
+                                        draggable={false}
+                                        onError={() => markFailed(idx, project.imgSrc)}
+                                        className="absolute inset-0 h-full w-full select-none object-contain object-center"
+                                    />
+                                </>
+                            )}
+                            <div ref={(el) => { dimRefs.current[idx] = el }} className="pointer-events-none absolute inset-0 bg-[#080a08] opacity-0" />
+                        </div>
+                    )
+                })}
+
                 <div
                     ref={copyRef}
-                    className="pointer-events-none absolute left-[5vw] right-[5vw] top-[5svh] z-20 text-left text-[#f7efdc] md:left-[4vw] md:right-auto md:top-[14svh] md:w-[21vw]"
+                    className="pointer-events-none absolute left-[5vw] right-[5vw] top-[5svh] z-30 text-left text-[#f7efdc] md:left-[4vw] md:right-auto md:top-[14svh] md:w-[21vw]"
                 >
                     <div className="inline-block rounded-full border border-[#d5bd87]/25 bg-[#0b0d0a]/40 px-2.5 py-1.5 backdrop-blur-sm">
                         <span className="text-[9px] uppercase tracking-[0.18em] text-[#d5bd87] sm:text-xs">
@@ -671,37 +1207,9 @@ export default function Applications() {
                     </h2>
                 </div>
 
-                {/* The reel: one card per project type on a vertical strip */}
-                {projectTypes.map((project, idx) => {
-                    const active = idx === activeIndex
-                    const isLast = idx === LAST
-                    return (
-                        <div
-                            key={project.title}
-                            ref={(el) => { cardRefs.current[idx] = el }}
-                            aria-hidden={!active}
-                            className={`absolute ${CARD_BOX} ${isLast ? 'z-[11]' : 'z-10'} cursor-grab overflow-hidden bg-[#10130f] shadow-[0_36px_100px_rgba(0,0,0,0.45)] will-change-transform active:cursor-grabbing`}
-                        >
-                            <div ref={(el) => { imageRefs.current[idx] = el }} className="absolute inset-0 will-change-transform">
-                                <img
-                                    src={project.imgSrc}
-                                    alt={active ? project.title : ''}
-                                    loading={idx < 2 ? 'eager' : 'lazy'}
-                                    decoding="async"
-                                    draggable={false}
-                                    className="h-full w-full select-none object-cover object-center"
-                                />
-                            </div>
-                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#070907]/65 via-[#070907]/20 to-transparent" />
-                            {isLast && <div ref={overlayRef} className="absolute inset-0 bg-[#080a08] opacity-0" />}
-                            <div ref={(el) => { dimRefs.current[idx] = el }} className="pointer-events-none absolute inset-0 bg-[#080a08] opacity-0" />
-                        </div>
-                    )
-                })}
-
                 <div
                     ref={detailsRef}
-                    className="pointer-events-none absolute bottom-[10svh] left-[5vw] z-20 w-[90vw] text-[#f7efdc] md:bottom-[11svh] md:left-[4vw] md:w-[21vw]"
+                    className="pointer-events-none absolute bottom-[10svh] left-[5vw] z-30 w-[90vw] text-[#f7efdc] md:bottom-[11svh] md:left-[4vw] md:w-[21vw]"
                 >
                     {projectTypes.map((project, idx) => (
                         <div
@@ -729,23 +1237,14 @@ export default function Applications() {
                     ref={exploreRef}
                     type="button"
                     onClick={() => selectProject((activeIndex + 1) % projectTypes.length)}
-                    className="group absolute bottom-[10svh] right-[6vw] z-30 hidden min-h-11 items-center gap-2 rounded-full border border-white/35 bg-black/30 px-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:border-[#d5bd87] hover:text-[#f5dfad] md:bottom-[11svh] md:right-[5vw] md:inline-flex md:min-h-12 md:px-6 md:text-xs"
+                    className="group absolute bottom-[10svh] right-[6vw] z-40 hidden min-h-11 items-center gap-2 rounded-full border border-white/35 bg-black/30 px-4 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:border-[#d5bd87] hover:text-[#f5dfad] md:bottom-[11svh] md:right-[5vw] md:inline-flex md:min-h-12 md:px-6 md:text-xs"
                     aria-label="Explore the next project type"
                 >
                     Explore
                     <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 md:h-4 md:w-4" />
                 </button>
 
-                <div ref={marksRef} className="pointer-events-none absolute inset-0 z-30">
-                    {/* Ring that follows the mouse; shown only on devices with a mouse */}
-                    <div
-                        ref={cursorRef}
-                        aria-hidden
-                        className="absolute left-0 top-0 hidden h-[84px] w-[84px] items-center justify-center rounded-full border border-[#f7efdc]/60 text-[9px] uppercase tracking-[0.24em] text-[#f7efdc] [@media(hover:hover)_and_(pointer:fine)]:flex"
-                    >
-                        Scroll
-                    </div>
-
+                <div ref={marksRef} className="pointer-events-none absolute inset-0 z-40">
                     <div className="pointer-events-auto absolute right-[2vw] top-1/2 hidden -translate-y-1/2 flex-col items-center gap-2 md:flex">
                         <span className="text-[9px] tracking-[0.18em] text-white/65">01</span>
                         <span className="h-8 w-px bg-white/20" />
@@ -780,7 +1279,6 @@ export default function Applications() {
                         ))}
                     </div>
                 </div>
-
             </div>
         </section>
     )
