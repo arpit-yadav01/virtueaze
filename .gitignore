@@ -49,3 +49,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# full-size source videos (originals kept outside the repo; site uses the compressed clips)
+/public/NorthWindSanctuarymobileview.mp4
+/public/NorthWindSanctuarywhy.mp4
