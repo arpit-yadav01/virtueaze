@@ -302,7 +302,8 @@
 
 'use client'
 
-import { Component, Suspense, useEffect, useRef, useState } from 'react'
+import { Component, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import * as THREE from 'three'
 import { Canvas, useThree } from '@react-three/fiber'
 import { ContactShadows, OrbitControls } from '@react-three/drei'
 import { Laptop } from './Laptop'
@@ -378,15 +379,6 @@ export function LaptopCanvas({ onReady, debug = false }) {
               <ResponsiveLaptop onReady={onReady} />
             </Suspense>
 
-            <ContactShadows
-              position={[0, -1.05, 0]}
-              opacity={0.45}
-              blur={2.6}
-              far={2.2}
-              scale={6}
-              resolution={256}
-            />
-
             {debug ? <OrbitControls makeDefault /> : null}
           </Canvas>
         </CanvasErrorBoundary>
@@ -435,18 +427,92 @@ const BASE_SCALE = 0.57 // size that frames the laptop well on a phone...
 const BASE_ASPECT = 1.16 // ...whose canvas is about 1.16 wide to 1 tall
 const MAX_SCALE = 0.62 // never larger than this, so the open lid and base always fit top to bottom
 
+const LAPTOP_Z = -4
+const LAPTOP_ROTATION = new THREE.Euler(0.05, 0, 0)
+const FIT_HEIGHT = 0.9 // share of the canvas height the fully open laptop may use
+const FIT_WIDTH = 0.94 // share of the canvas width
+
 function ResponsiveLaptop({ onReady }) {
-  const { size } = useThree()
+  const { size, camera } = useThree()
+  const [bounds, setBounds] = useState(null)
   const aspect = size.width / Math.max(size.height, 1)
   // Narrower canvas -> smaller laptop so the sides fit; wider canvas -> slightly larger, up to the cap
-  const scale = Math.min(BASE_SCALE * (aspect / BASE_ASPECT), MAX_SCALE)
+  const preferredScale = Math.min(BASE_SCALE * (aspect / BASE_ASPECT), MAX_SCALE)
+
+  // Shrink if needed and shift up/down so the whole animation (open lid, screen tiles)
+  // stays inside the canvas instead of being cut off at the top
+  const { scale, y } = useMemo(
+    () => fitToView(bounds, camera, aspect, preferredScale),
+    [bounds, camera, aspect, preferredScale]
+  )
 
   return (
-    <Laptop
-      onReady={onReady}
-      position={[0, 0, -4]}
-      rotation={[0.05, 0, 0]}
-      scale={scale}
-    />
+    <>
+      <Laptop
+        onReady={onReady}
+        onBounds={setBounds}
+        position={[0, y, LAPTOP_Z]}
+        rotation={[LAPTOP_ROTATION.x, LAPTOP_ROTATION.y, LAPTOP_ROTATION.z]}
+        scale={scale}
+      />
+      <ContactShadows
+        position={[0, -1.05 + y, 0]}
+        opacity={0.45}
+        blur={2.6}
+        far={2.2}
+        scale={6}
+        resolution={256}
+      />
+    </>
   )
+}
+
+function fitToView(bounds, camera, aspect, preferredScale) {
+  if (!bounds || bounds.isEmpty()) return { scale: preferredScale, y: 0 }
+
+  const cam = camera.clone()
+  cam.aspect = aspect
+  cam.updateProjectionMatrix()
+  cam.updateMatrixWorld()
+
+  const corners = []
+  for (const x of [bounds.min.x, bounds.max.x])
+    for (const yy of [bounds.min.y, bounds.max.y])
+      for (const z of [bounds.min.z, bounds.max.z]) corners.push(new THREE.Vector3(x, yy, z))
+
+  // Screen extent (-1..1 on each axis) of the laptop at a given scale and height
+  const extent = (scale, y) => {
+    const box = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity }
+    for (const c of corners) {
+      const p = c.clone().multiplyScalar(scale).applyEuler(LAPTOP_ROTATION)
+      p.y += y
+      p.z += LAPTOP_Z
+      p.project(cam)
+      box.minX = Math.min(box.minX, p.x)
+      box.maxX = Math.max(box.maxX, p.x)
+      box.minY = Math.min(box.minY, p.y)
+      box.maxY = Math.max(box.maxY, p.y)
+    }
+    return box
+  }
+
+  // World height covered by one screen unit at the laptop's distance
+  const distance = cam.position.distanceTo(new THREE.Vector3(0, 0, LAPTOP_Z))
+  const worldPerUnit = distance * Math.tan(THREE.MathUtils.degToRad(cam.fov / 2))
+
+  let scale = preferredScale
+  let y = 0
+  for (let i = 0; i < 6; i++) {
+    const e = extent(scale, y)
+    const fit = Math.min(
+      (2 * FIT_HEIGHT) / (e.maxY - e.minY),
+      (2 * FIT_WIDTH) / (e.maxX - e.minX),
+      1
+    )
+    scale *= fit
+    const centred = extent(scale, y)
+    y -= ((centred.minY + centred.maxY) / 2) * worldPerUnit
+  }
+
+  return { scale, y }
 }

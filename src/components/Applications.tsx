@@ -812,6 +812,9 @@
 
 
 
+
+
+
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
@@ -830,12 +833,12 @@ interface ProjectTypeData {
 }
 
 const projectTypes: ProjectTypeData[] = [
-    { title: 'Residential towers', subtitle: 'Full elevation and floor control.', imgSrc: 'https://framerusercontent.com/images/PIckQ7vs3QZXJ2eLyq91rmt3hLk.png?width=1399&height=670' },
-    { title: 'Luxury residences', subtitle: 'Material, detail and atmosphere in every room.', imgSrc: 'https://framerusercontent.com/images/qWNssr2VW9pk5zkdisoIYcc0Uo.png?width=1367&height=790' },
-    { title: 'Masterplans', subtitle: 'Navigate phases, amenities and the bigger picture.', imgSrc: 'https://framerusercontent.com/images/QSUDPXU7sOqM557B2LAeaCrKIhc.png?width=1316&height=791' },
-    { title: 'Villas & plots', subtitle: 'Plots, boundaries and custom villa walkthroughs.', imgSrc: 'https://framerusercontent.com/images/eKrcvOMsf6CXnBH0uTpWJli2vY.png?scale-down-to=1024&width=1180&height=900' },
-    { title: 'Commercial & retail', subtitle: 'Footfall, leasing layouts and retail possibilities.', imgSrc: 'https://framerusercontent.com/images/venMvyC03Nyji0T9rBpLlWjBjxo.png?width=1367&height=790' },
-    { title: 'International launches', subtitle: 'Touchscreen-ready experiences for every market.', imgSrc: 'https://framerusercontent.com/images/oytc7a861tIZUl4y8BOlpxFck.png?width=1419&height=790' },
+    { title: 'Residential towers', subtitle: 'Explore the lifestyle from the eye-level walk-through.', imgSrc: 'https://images.unsplash.com/photo-1786457070849-9adc7d91c682?q=80&w=1600&auto=format&fit=crop' },
+    { title: 'Luxury residences', subtitle: 'A closer look at the finished spaces and everyday moments.', imgSrc: 'https://images.unsplash.com/photo-1757924461488-ef9ad0670978?q=80&w=1600&auto=format&fit=crop' },
+    { title: 'Masterplans', subtitle: 'See the broader project narrative through a guided walk.', imgSrc: 'https://images.unsplash.com/photo-1672669092491-ac5a210747bc?q=80&w=1600&auto=format&fit=crop' },
+    { title: 'Villas & plots', subtitle: 'Follow the person-led experience across the property journey.', imgSrc: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=1600&auto=format&fit=crop' },
+    { title: 'Commercial & retail', subtitle: 'Move through the spaces as if you are already there.', imgSrc: 'https://images.unsplash.com/photo-1772642986691-bff3d6f9ac6b?q=80&w=1600&auto=format&fit=crop' },
+    { title: 'International launches', subtitle: 'Short, cinematic loops built for a more human story.', imgSrc: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1600&auto=format&fit=crop' },
 ]
 
 const VELLUM = '#f7efdc'
@@ -1161,27 +1164,24 @@ export default function ApplicationsGallery() {
                                 </div>
                             ) : (
                                 <>
-                                    {/* Blurred copy fills the space around pictures that are wider or taller than the card */}
+                                    {/* Blurred copy fills the card edges; the sharp picture sits on top */}
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={project.imgSrc}
                                         alt=""
                                         aria-hidden="true"
                                         loading="eager"
-                                        decoding="async"
                                         draggable={false}
                                         className="absolute inset-0 h-full w-full scale-110 select-none object-cover object-center opacity-50 blur-2xl"
                                     />
-                                    {/* The whole picture, centred and never cropped */}
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={project.imgSrc}
                                         alt={active ? project.title : ''}
                                         loading="eager"
-                                        decoding="async"
                                         draggable={false}
                                         onError={() => markFailed(idx, project.imgSrc)}
-                                        className="absolute inset-0 h-full w-full select-none object-contain object-center"
+                                        className="absolute inset-0 h-full w-full select-none object-cover object-center"
                                     />
                                 </>
                             )}

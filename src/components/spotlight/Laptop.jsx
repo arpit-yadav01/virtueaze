@@ -12,7 +12,7 @@ const MODEL_PATH = '/models/laptop.glb'
  * that the parent drives from a ScrollTrigger as the laptop moves through
  * the viewport.
  */
-export function Laptop({ onReady, ...props }) {
+export function Laptop({ onReady, onBounds, ...props }) {
   const group = useRef(null)
 
   const { scene, animations } = useGLTF(MODEL_PATH, '/draco/', true)
@@ -58,7 +58,24 @@ export function Laptop({ onReady, ...props }) {
       action.time = 0
     })
 
+    // Measure the space the laptop takes over its whole animation (open lid +
+    // screen tiles), in this group's own units, so the canvas can fit all of it
+    const toLocal = scene.parent
+      ? scene.parent.matrixWorld.clone().invert()
+      : new THREE.Matrix4()
+    const animatedBounds = new THREE.Box3()
+    for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+      actions.forEach((action) => {
+        action.time = t * action.getClip().duration
+      })
+      mixer.update(0)
+      animatedBounds.union(new THREE.Box3().setFromObject(scene).applyMatrix4(toLocal))
+    }
+    actions.forEach((action) => {
+      action.time = 0
+    })
     mixer.update(0)
+    onBounds?.(animatedBounds)
 
     const setMechProgress = (t) => {
       const clamped = THREE.MathUtils.clamp(t, 0, 1)
@@ -78,7 +95,7 @@ export function Laptop({ onReady, ...props }) {
     return () => {
       actions.forEach((action) => action.stop())
     }
-  }, [actions, mixer, scene, onReady])
+  }, [actions, mixer, scene, onReady, onBounds])
 
   return (
     <group ref={group} {...props} dispose={null}>
