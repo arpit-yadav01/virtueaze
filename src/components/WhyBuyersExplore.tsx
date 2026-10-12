@@ -18,6 +18,9 @@ interface ProjectFeature {
 // One short portrait clip per card, cut from the project videos to match each caption
 const exploreVideo = (name: string) => `/models/video/explore/${name}.mp4`
 
+const BASE_SECTION_HEIGHT_SVH = 780
+const FINAL_HOLD_EXTRA_SVH = 200
+
 const features: ProjectFeature[] = [
     { number: '(01)', title: 'Full exterior view', desc: 'The complete building from every angle and height — approach road, façade, terraces.', videoSrc: exploreVideo('01-exterior') },
     { number: '(02)', title: 'Nearby connectivity', desc: 'Metro, highways, schools, hospitals and malls mapped with distances and travel times.', videoSrc: exploreVideo('02-connectivity') },
@@ -104,15 +107,18 @@ export default function WhyBuyersExplore() {
                 timeline.to(card, { x: `${direction * -115}vw`, rotate: index % 2 === 0 ? 3 : -3, opacity: 0, duration: 0.85, ease: 'power3.in' }, '+=0.35')
             })
 
-            // Hold on the last card for a moment before the next section scrolls in
-            timeline.to({}, { duration: 1 })
+            // Add two screen-heights of rest after card 7 fully arrives. Extend the
+            // timeline in proportion to the section so earlier cards keep their pace.
+            const baseDuration = timeline.duration() + 1
+            const extraHoldDuration = baseDuration * FINAL_HOLD_EXTRA_SVH / (BASE_SECTION_HEIGHT_SVH - 100)
+            timeline.to({}, { duration: 1 + extraHoldDuration })
         }, section)
 
         return () => ctx.revert()
     }, [])
 
     return (
-        <section id="experience" ref={sectionRef} className="relative h-[780svh] scroll-mt-24 overflow-hidden border-t border-[#d4af37]/20 bg-background text-foreground">
+        <section id="experience" ref={sectionRef} style={{ height: `${BASE_SECTION_HEIGHT_SVH + FINAL_HOLD_EXTRA_SVH}svh` }} className="relative scroll-mt-24 overflow-hidden border-t border-[#d4af37]/20 bg-background text-foreground">
             <div ref={stageRef} className="relative flex h-[100svh] min-h-[620px] w-full items-center justify-center overflow-hidden px-6">
                 <div ref={introRef} className="relative z-10 max-w-3xl text-center flex flex-col items-center">
                     <span className="inline-block px-3 py-1.5 mb-8 bg-foreground/5 text-foreground/70 text-[10px] md:text-xs tracking-widest uppercase border border-foreground/10">

@@ -815,6 +815,9 @@
 
 
 
+
+
+
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
@@ -838,14 +841,14 @@ const projectTypes: ProjectTypeData[] = [
     { title: 'Masterplans', subtitle: 'See the broader project narrative through a guided walk.', imgSrc: 'https://images.unsplash.com/photo-1672669092491-ac5a210747bc?q=80&w=1600&auto=format&fit=crop' },
     { title: 'Villas & plots', subtitle: 'Follow the person-led experience across the property journey.', imgSrc: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=1600&auto=format&fit=crop' },
     { title: 'Commercial & retail', subtitle: 'Move through the spaces as if you are already there.', imgSrc: 'https://images.unsplash.com/photo-1772642986691-bff3d6f9ac6b?q=80&w=1600&auto=format&fit=crop' },
-    { title: 'International launches', subtitle: 'Short, cinematic loops built for a more human story.', imgSrc: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1600&auto=format&fit=crop' },
+    { title: 'International launches', subtitle: 'Short, cinematic loops built for a more human story.', imgSrc: 'https://images.unsplash.com/photo-1768295981542-ec39b49b4f71?q=80&w=1600&auto=format&fit=crop' },
 ]
 
 const VELLUM = '#f7efdc'
-const SCRUB_DURATION = 10 // how many screen-heights of scrolling the whole section takes
+const SCRUB_DURATION = 8.5 // how many screen-heights of scrolling the whole section takes
 const STEP_MOVE = 1 // scroll share for moving from one card to the next
 const STEP_HOLD = 0.8 // scroll share where the gallery rests on each card so its text can be read
-const HOLD = 1.4 // pause on the last card before the ending
+const HOLD = 1.4 // short pause on the last card before the page moves on to the next section
 
 // Gallery tuning
 const CARD_RATIO = 1.7 // card width divided by height
@@ -875,7 +878,7 @@ export default function ApplicationsGallery() {
     const detailRefs = useRef<(HTMLDivElement | null)[]>([])
 
     const [activeIndex, setActiveIndex] = useState(0)
-    const proxy = useRef({ value: 0, expand: 0 })
+    const proxy = useRef({ value: 0 })
     const lastIndex = useRef(0)
     const draggedRef = useRef(false)
     const stRef = useRef<ScrollTrigger | null>(null)
@@ -943,15 +946,13 @@ export default function ApplicationsGallery() {
 
                 let lean = 0
 
-                // Places every card and text block for the current index (0 to 5) and ending amount (0 to 1)
+                // Places every card and text block for the current index (0 to 5)
                 const render = () => {
                     const p = state.value
-                    const e = state.expand
 
                     cards.forEach((card, i) => {
                         const d = i - p
                         const ad = Math.abs(d)
-                        const isLast = i === LAST
 
                         const textAlpha = clamp(0, 1, 1 - (ad - TEXT_CLEAR_ZONE) / TEXT_FADE)
                         const textBlur = reduceMotion || ad <= TEXT_CLEAR_ZONE ? 0 : Math.min((ad - TEXT_CLEAR_ZONE) * 40, 10)
@@ -966,36 +967,25 @@ export default function ApplicationsGallery() {
                             return
                         }
 
-                        let w = W, h = H
-                        let cx = CX + d * DX, cy = CY + d * DY
-                        let alpha = ad <= 1 ? 1 : clamp(0, 1, 1 - (ad - 1) * 0.8)
+                        const cx = CX + d * DX
+                        const cy = CY + d * DY
+                        const alpha = ad <= 1 ? 1 : clamp(0, 1, 1 - (ad - 1) * 0.8)
                         const scale = ad <= 1 ? 1 - (1 - SIDE_SCALE) * ad : Math.max(0.4, SIDE_SCALE - 0.12 * (ad - 1))
 
-                        if (isLast) {
-                            w = W + (sw - W) * e
-                            h = H + (sh - H) * e
-                            cx += (sw / 2 - cx) * e
-                            cy += (sh / 2 - cy) * e
-                        } else {
-                            alpha *= clamp(0, 1, 1 - e * 3)
-                        }
-
                         gsap.set(card, {
-                            x: cx - w / 2,
-                            y: cy - h / 2,
-                            width: w,
-                            height: h,
+                            x: cx - W / 2,
+                            y: cy - H / 2,
+                            width: W,
+                            height: H,
                             scale,
                             rotation: clamp(-1.5, 1.5, d) * TILT,
-                            skewY: lean * LEAN * (1 - e),
+                            skewY: lean * LEAN,
                             autoAlpha: alpha,
-                            zIndex: 20 - Math.round(ad * 4) + (isLast && e > 0 ? 10 : 0),
-                            borderRadius: isLast ? RADIUS * (1 - e) : RADIUS,
+                            zIndex: 20 - Math.round(ad * 4),
+                            borderRadius: RADIUS,
                             filter: ad > 1 && !reduceMotion ? `blur(${(ad - 1) * 6}px)` : 'none',
                         })
-                        gsap.set(dims[i], {
-                            opacity: isLast ? Math.max(Math.min(ad, 1) * SIDE_DIM, e * 0.78) : Math.min(ad, 1) * SIDE_DIM,
-                        })
+                        gsap.set(dims[i], { opacity: Math.min(ad, 1) * SIDE_DIM })
                     })
 
                     const next = Math.round(p)
@@ -1020,7 +1010,7 @@ export default function ApplicationsGallery() {
                 measure()
                 render()
 
-                // Scroll settles in the middle of each card's rest, or on the finished ending
+                // Scroll settles in the middle of each card's rest, or at the very end
                 let snapPoints: number[] = [0, 1]
 
                 const tl = gsap.timeline({
@@ -1054,12 +1044,9 @@ export default function ApplicationsGallery() {
                     )
                 }
 
-                // Ending: the last card grows to fill the screen while the text and controls fade
-                const expand = gsap.timeline()
-                expand.to(state, { expand: 1, duration: 2, ease: 'power3.inOut', onUpdate: render }, 0)
-                expand.to([marks, explore], { autoAlpha: 0, duration: 0.5, ease: 'power1.out' }, 0)
-                expand.to([copy, details], { opacity: 0, y: -30, duration: 0.8, ease: 'power2.out' }, 0)
-                tl.add(expand, STRIP_DURATION + HOLD)
+                // Ending: the gallery simply stays on the last card for a moment, then the page scrolls on.
+                // No full-screen growth of the last card, so the last image never appears twice.
+                tl.to({}, { duration: HOLD }, STRIP_DURATION)
 
                 const total = tl.totalDuration()
                 snapPoints = [...projectTypes.map((_, i) => restTime(i) / total), 1]
