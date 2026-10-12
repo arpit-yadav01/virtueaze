@@ -28,9 +28,9 @@ export default function Home() {
         <Spotlight />
         <ProblemSolution />
         <WhyBuyersExplore />
-        <Applications />
-        <HowWeWork />
         <Channels />
+        <HowWeWork />
+        <Applications />
         <Testimonials />
         <Projects />
         <Faqs />

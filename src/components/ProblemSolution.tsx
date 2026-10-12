@@ -390,7 +390,7 @@
 
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Eye, Building2, MousePointerClick } from 'lucide-react'
@@ -496,6 +496,43 @@ export default function ProblemSolution() {
     const videoWrapperRef = useRef<HTMLElement>(null)
     const videoInnerRef = useRef<HTMLDivElement>(null)
     const textContentRef = useRef<HTMLDivElement>(null)
+    const videoRef = useRef<HTMLVideoElement>(null)
+    const [videoSource, setVideoSource] = useState('/ProjectMCC%20%20%202025-10-30%2004-09-59.mp4')
+    const [playbackRate, setPlaybackRate] = useState(1)
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const mediaQuery = window.matchMedia('(max-width: 767px)')
+
+        const updateVideoSource = () => {
+            if (mediaQuery.matches) {
+                setVideoSource('/TremontResidential%20%20%202025-12-28%2002-55-18.mp4')
+                setPlaybackRate(3)
+                return
+            }
+
+            setVideoSource('/ProjectMCC%20%20%202025-10-30%2004-09-59.mp4')
+            setPlaybackRate(1)
+        }
+
+        updateVideoSource()
+
+        const handleChange = () => updateVideoSource()
+        if (typeof mediaQuery.addEventListener === 'function') {
+            mediaQuery.addEventListener('change', handleChange)
+            return () => mediaQuery.removeEventListener('change', handleChange)
+        }
+
+        mediaQuery.addListener(handleChange)
+        return () => mediaQuery.removeListener(handleChange)
+    }, [])
+
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.playbackRate = playbackRate
+        }
+    }, [playbackRate])
 
     useEffect(() => {
         const root = sectionRef.current
@@ -948,13 +985,14 @@ export default function ProblemSolution() {
                         className="absolute inset-0 z-10 h-full w-full overflow-hidden bg-black shadow-[0_40px_120px_rgba(0,0,0,0.6)] ring-1 ring-[#bf953f]/20 will-change-transform"
                     >
                         <video
-                            ref={(video) => { if (video) video.playbackRate = 2 }}
-                            src="/TremontResidential%20%20%202025-12-28%2002-55-18.mp4"
+                            ref={videoRef}
+                            src={videoSource}
                             className="absolute inset-0 h-full w-full object-cover object-center will-change-transform"
                             autoPlay
                             loop
                             muted
                             playsInline
+                            preload="auto"
                         />
                         <div className="pointer-events-none absolute inset-0 bg-black/10" />
                     </div>
