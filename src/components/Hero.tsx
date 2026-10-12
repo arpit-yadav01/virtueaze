@@ -162,8 +162,9 @@ export default function Hero() {
       trigger: sectionRef.current,
       start: 'top bottom',
       end: 'bottom top',
-      onEnter: () => videoRef.current?.play(),
-      onEnterBack: () => videoRef.current?.play(),
+      // play() rejects with AbortError when a pause() lands before it resolves (fast scrolling)
+      onEnter: () => videoRef.current?.play().catch(() => {}),
+      onEnterBack: () => videoRef.current?.play().catch(() => {}),
       onLeave: () => videoRef.current?.pause(),
       onLeaveBack: () => videoRef.current?.pause(),
     })

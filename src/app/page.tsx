@@ -25,13 +25,13 @@ export default function Home() {
         <Navbar />
         <Hero />
         <Partners />
+        <Spotlight />
         <ProblemSolution />
         <WhyBuyersExplore />
         <Applications />
         <HowWeWork />
         <Channels />
         <Testimonials />
-        <Spotlight />
         <Projects />
         <Faqs />
         <CTA />

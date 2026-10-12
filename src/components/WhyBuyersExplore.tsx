@@ -12,18 +12,23 @@ interface ProjectFeature {
     number: string
     title: string
     desc: string
-    imgSrc: string
+    videoSrc: string
 }
 
+const applicationVideos = [
+    '/models/video/application/iERQpQTjyC530ipfTVrYwPCkhg.mp4',
+    '/models/video/application/NorthWindSanctuary%20%20%202026-03-19%2005-05-15.mp4',
+]
+
 const features: ProjectFeature[] = [
-    { number: '(01)', title: 'Full exterior view', desc: 'The complete building from every angle and height — approach road, façade, terraces.', imgSrc: 'https://images.unsplash.com/photo-1759472018220-d6e258796fce?w=900&auto=format&fit=crop&q=80' },
-    { number: '(02)', title: 'Nearby connectivity', desc: 'Metro, highways, schools, hospitals and malls mapped with distances and travel times.', imgSrc: 'https://plus.unsplash.com/premium_photo-1661963428055-4b25a7ebd3a9?w=900&auto=format&fit=crop&q=80' },
-    { number: '(03)', title: 'Day, night & sun path', desc: 'Real lighting from sunrise to sunset, so buyers see when the sun reaches their balcony.', imgSrc: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=900&auto=format&fit=crop&q=80' },
-    { number: '(04)', title: 'Amenities access', desc: 'Lobby, lifts, parking, clubhouse, pool and gardens — every shared space, walkable.', imgSrc: 'https://plus.unsplash.com/premium_photo-1661957690855-693887d13b87?w=900&auto=format&fit=crop&q=80' },
-    { number: '(05)', title: 'Complete interior walkthrough', desc: 'Room to room in true scale. Check the kitchen width, balcony door and ceiling height.', imgSrc: 'https://images.unsplash.com/photo-1553101331-ce6281c677b9?w=900&auto=format&fit=crop&q=80' },
-    { number: '(06)', title: 'Unit comparison + live availability', desc: 'Compare layouts side by side with sold, held and available units synced to your inventory.', imgSrc: 'https://images.unsplash.com/photo-1763811939454-e7e6ec3394ee?w=900&auto=format&fit=crop&q=80' },
-    { number: '(07)', title: 'The view from every balcony', desc: 'Pick a tower, floor and facing to see what that exact unit sees — not a generic render.', imgSrc: 'https://images.unsplash.com/photo-1759472018220-d6e258796fce?w=900&auto=format&fit=crop&q=80' },
-    { number: '(08)', title: 'Reserve from inside the twin', desc: 'Talk to sales or reserve a unit directly through your CRM or WhatsApp.', imgSrc: 'https://plus.unsplash.com/premium_photo-1661963428055-4b25a7ebd3a9?w=900&auto=format&fit=crop&q=80' },
+    { number: '(01)', title: 'Full exterior view', desc: 'The complete building from every angle and height — approach road, façade, terraces.', videoSrc: applicationVideos[0] },
+    { number: '(02)', title: 'Nearby connectivity', desc: 'Metro, highways, schools, hospitals and malls mapped with distances and travel times.', videoSrc: applicationVideos[1] },
+    { number: '(03)', title: 'Day, night & sun path', desc: 'Real lighting from sunrise to sunset, so buyers see when the sun reaches their balcony.', videoSrc: applicationVideos[0] },
+    { number: '(04)', title: 'Amenities access', desc: 'Lobby, lifts, parking, clubhouse, pool and gardens — every shared space, walkable.', videoSrc: applicationVideos[1] },
+    { number: '(05)', title: 'Complete interior walkthrough', desc: 'Room to room in true scale. Check the kitchen width, balcony door and ceiling height.', videoSrc: applicationVideos[0] },
+    { number: '(06)', title: 'Unit comparison + live availability', desc: 'Compare layouts side by side with sold, held and available units synced to your inventory.', videoSrc: applicationVideos[1] },
+    { number: '(07)', title: 'The view from every balcony', desc: 'Pick a tower, floor and facing to see what that exact unit sees — not a generic render.', videoSrc: applicationVideos[0] },
+    { number: '(08)', title: 'Reserve from inside the twin', desc: 'Talk to sales or reserve a unit directly through your CRM or WhatsApp.', videoSrc: applicationVideos[1] },
 ]
 
 export default function WhyBuyersExplore() {
@@ -96,7 +101,7 @@ export default function WhyBuyersExplore() {
                 <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
                     {features.map((feature, index) => (
                         <div key={feature.title} ref={(element) => { if (element) cardRefs.current[index] = element }} className="absolute h-[62svh] min-h-[420px] w-[82vw] max-w-[430px] overflow-hidden rounded-[26px] border border-[#d4af37]/45 bg-black shadow-[0_30px_80px_rgba(0,0,0,0.3)] will-change-transform sm:w-[54vw] md:h-[70vh] md:w-[390px]">
-                            <img src={feature.imgSrc} alt={feature.title} className="h-full w-full object-cover" />
+                            <video src={feature.videoSrc} aria-hidden="true" autoPlay muted loop playsInline preload="metadata" className="h-full w-full object-cover" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/15 to-black/5" />
                             <div className="absolute inset-x-5 bottom-5 text-white sm:inset-x-7 sm:bottom-7">
                                 <div className="text-xs uppercase tracking-[0.2em] font-medium mb-2 text-[#bf953f] flex items-center gap-3">

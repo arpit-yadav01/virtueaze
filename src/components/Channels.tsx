@@ -897,10 +897,11 @@ const projectTypes: ProjectTypeData[] = [
     { title: 'Client meetings', subtitle: 'Walk buyers through the project on a laptop, right at the table.', videoSrc: '/models/video/CYjxlhP8w2vuDGr8Nnwq4IggYjA.mp4' },
     { title: 'Sales gallery', subtitle: 'Touchscreen walkthroughs that let buyers navigate the towers themselves.', videoSrc: '/models/video/hnJ4SM3PJMiiZKz0ZTzGhv6jzM.mp4' },
     { title: 'Unit selection', subtitle: 'Open any floor and pick the exact unit, with live availability.', videoSrc: '/models/video/iERQpQTjyC530ipfTVrYwPCkhg.mp4' },
+    { title: 'Balcony view', subtitle: 'Pick a tower, floor and facing to see what that exact unit sees.', videoSrc: '/models/video/balconyview-clip-894bd9beb93c.mp4' },
 ]
 
 const VELLUM = '#f7efdc'
-const SCRUB_DURATION = 6 // how many screen-heights of scrolling the whole section takes
+const SCRUB_DURATION = projectTypes.length * 1.5 // how many screen-heights of scrolling the whole section takes
 const STEP_MOVE = 1 // scroll share for moving from one card to the next
 const STEP_HOLD = 0.8 // scroll share where the gallery rests on each card so its text can be read
 const HOLD = 0.4 // pause on the last card before the ending

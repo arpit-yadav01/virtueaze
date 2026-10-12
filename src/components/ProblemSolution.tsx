@@ -945,10 +945,11 @@ export default function ProblemSolution() {
                     {/* Video: a tilted screen that swings flat and fills the view */}
                     <div
                         ref={videoInnerRef}
-                        className="absolute inset-0 z-10 h-full w-full overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.6)] ring-1 ring-[#bf953f]/20 will-change-transform"
+                        className="absolute inset-0 z-10 h-full w-full overflow-hidden bg-black shadow-[0_40px_120px_rgba(0,0,0,0.6)] ring-1 ring-[#bf953f]/20 will-change-transform"
                     >
                         <video
-                            src="/v2.mp4"
+                            ref={(video) => { if (video) video.playbackRate = 2 }}
+                            src="/TremontResidential%20%20%202025-12-28%2002-55-18.mp4"
                             className="absolute inset-0 h-full w-full object-cover object-center will-change-transform"
                             autoPlay
                             loop
