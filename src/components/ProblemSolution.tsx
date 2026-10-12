@@ -497,8 +497,8 @@ export default function ProblemSolution() {
     const videoInnerRef = useRef<HTMLDivElement>(null)
     const textContentRef = useRef<HTMLDivElement>(null)
     const videoRef = useRef<HTMLVideoElement>(null)
-    const [videoSource, setVideoSource] = useState('/ProjectMCC%20%20%202025-10-30%2004-09-59.mp4')
-    const [playbackRate, setPlaybackRate] = useState(1)
+    const [videoSource, setVideoSource] = useState('/desktop_view.mp4')
+    const [playbackRate, setPlaybackRate] = useState(2)
 
     useEffect(() => {
         if (typeof window === 'undefined') return
@@ -512,8 +512,8 @@ export default function ProblemSolution() {
                 return
             }
 
-            setVideoSource('/ProjectMCC%20%20%202025-10-30%2004-09-59.mp4')
-            setPlaybackRate(1)
+            setVideoSource('/desktop_view.mp4')
+            setPlaybackRate(2)
         }
 
         updateVideoSource()
@@ -528,11 +528,20 @@ export default function ProblemSolution() {
         return () => mediaQuery.removeListener(handleChange)
     }, [])
 
+    // Loading a new source resets the speed to 1, so apply it again once the video has loaded
     useEffect(() => {
-        if (videoRef.current) {
-            videoRef.current.playbackRate = playbackRate
+        const video = videoRef.current
+        if (!video) return
+
+        const applyRate = () => {
+            video.defaultPlaybackRate = playbackRate
+            video.playbackRate = playbackRate
         }
-    }, [playbackRate])
+
+        applyRate()
+        video.addEventListener('loadedmetadata', applyRate)
+        return () => video.removeEventListener('loadedmetadata', applyRate)
+    }, [playbackRate, videoSource])
 
     useEffect(() => {
         const root = sectionRef.current
